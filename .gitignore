@@ -1,6 +1,36 @@
+## study def files
+
 *~
 model.log
 */input.csv
 __pycache__
 .python-version
 output/*
+
+
+## notebook files
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# pyenv
+.python-version
+
+# jupyter
+.ipynb_checkpoints
+.ipython/
+.jupyter/
+.local/
+
+# sublime test/pycharm
+.idea/
+.DS_Store
+
+# Emacs
+*~
+run.exe
+
+## R files
+*.rproj
