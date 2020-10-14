@@ -1,17 +1,6 @@
-# OpenSAFELY Research Template
+# OpenSAFELY demo materials
 
-This is a template repository for making new OpenSAFELY resarch projects.  Eventually it'll become a framework. To get started, create a new repo using this repo as a template, delete this front matter, and edit the text that follows.
 
-# _title goes here_
-
-This is the code and configuration for our paper, _name goes here_
-
-* The paper is [here]()
-* Raw model outputs, including charts, crosstabs, etc, are in `released_analysis_results/`
-* If you are interested in how we defined our variables, take a look at the [study definition](analysis/study_definition.py); this is written in `python`, but non-programmers should be able to understand what is going on there
-* If you are interested in how we defined our code lists, look in the [codelists folder](./codelists/).
-* Developers and epidemiologists interested in the code should review
-[DEVELOPERS.md](./docs/DEVELOPERS.md).
 
 # About the OpenSAFELY framework
 
