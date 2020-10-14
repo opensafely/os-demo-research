@@ -1,0 +1,31 @@
+id,term
+44P5.,Serum HDL cholesterol level
+44P6.,Serum LDL cholesterol level
+44PB.,Serum fasting HDL cholesterol level
+44PC.,Serum random HDL cholesterol level
+44PD.,Serum fasting LDL cholesterol level
+44PE.,Serum random LDL cholesterol level
+44PZ.,Serum cholesterol NOS
+X772L,Cholesterol level
+X772M,High density lipoprotein cholesterol level
+X772N,Low density lipoprotein cholesterol level
+XE2eD,Serum cholesterol level
+XSK14,Total cholesterol measurement
+XaEVr,Plasma HDL cholesterol level
+XaEVs,Plasma LDL cholesterol level
+XaFs9,Fasting cholesterol level
+XaIQb,Target cholesterol level
+XaIRd,Plasma total cholesterol level
+XaIYp,Fluid sample cholesterol level
+XaIp4,Calculated LDL cholesterol level
+XaIqd,Pre-treatment serum cholesterol level
+XaJe9,Serum total cholesterol level
+XaK9d,7-Dehydrocholesterol level
+XaLux,Serum fasting total cholesterol
+XaN3z,Non high density lipoprotein cholesterol level
+XaXbu,Target serum total cholesterol level
+XaXeX,Target serum high density lipoprotein cholesterol level
+XaXeZ,Target serum low density lipoprotein cholesterol level
+XaXhV,Target serum non high density lipoprotein cholesterol level
+XabE1,Serum non high density lipoprotein cholesterol level
+XabT0,Estimated serum non-HDL cholesterol level
