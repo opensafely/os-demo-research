@@ -9,8 +9,8 @@ measures_dict = dict(
                 label = "overall",
                 measure_args = dict(
                     id = "cholesterol_overall", # this should be "{key of the level 1 dict}_{key of the level 3 dict}"
-                    numerator = "cholesterol_numer",
-                    denominator="cholesterol_denom",
+                    numerator = "cholesterol",
+                    denominator="population",
                     group_by = "allpatients"
                 ),
             ),
@@ -18,17 +18,17 @@ measures_dict = dict(
                 label = "by practice",
                 measure_args = dict(
                     id = "cholesterol_practice",
-                    numerator = "cholesterol_numer",
-                    denominator="cholesterol_denom",
+                    numerator = "cholesterol",
+                    denominator="population",
                     group_by = "practice"
                 ),
             ),
             stp = dict(
                 label = "by STP",
                 measure_args = dict(
-                    id = "cholesterol_practice",
-                    numerator = "cholesterol_numer",
-                    denominator="cholesterol_denom",
+                    id = "cholesterol_stp",
+                    numerator = "cholesterol",
+                    denominator="population",
                     group_by = "stp"
                 ),
             ),

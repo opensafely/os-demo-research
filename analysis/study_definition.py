@@ -15,12 +15,12 @@ from cohortextractor import (
 from codelists import *
 
 # import utility functions from lib folder
-# from lib.measures_dict import measures_dict
+from lib.measures_dict import measures_dict
 
 ## STUDY POPULATION
 # Defines both the study population and points to the important covariates
 
-index_date = "2020-02-01"
+index_date = "2020-01-01"
 date_end = "2020-09-01"
 today = "2020-09-21"
 
@@ -44,6 +44,21 @@ study = StudyDefinition(
         """
     ),
 
+    age=patients.age_as_of(
+        index_date,
+        return_expectations={
+            "rate": "universal",
+            "int": {"distribution": "population_ages"},
+        },
+    ),
+
+    sex=patients.sex(
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": {"M": 0.49, "F": 0.51}},
+        }
+    ),
+    
     died = patients.satisfying(
         """dead_ONS""",
         dead_ONS = patients.died_from_any_cause(
@@ -58,31 +73,20 @@ study = StudyDefinition(
         return_expectations={"incidence": 0.99}
     ),
 
+
     ### geographic /administrative groups
 
     practice = patients.registered_practice_as_of(
-         "2020-02-01",
-         returning="pseudo_id",
+         index_date,
+         returning = "pseudo_id",
          return_expectations={
              "rate": "universal",
-             "category": {
-                 "ratios": {
-                     "practice1": 0.1,
-                     "practice2": 0.1,
-                     "practice3": 0.1,
-                     "practice4": 0.1,
-                     "practice5": 0.1,
-                     "practice6": 0.1,
-                     "practice7": 0.2,
-                     "practice8": 0.2,
-                 },
-             },
+             "int": {"distribution": "normal", "mean": 100, "stddev": 20}
          },
     ),
 
-    ## https://github.com/ebmdatalab/tpp-sql-notebook/issues/54
     stp = patients.registered_practice_as_of(
-        "2020-02-01",
+        index_date,
         returning="stp_code",
         return_expectations={
             "rate": "universal",
@@ -91,7 +95,7 @@ study = StudyDefinition(
     ),
 
      region = patients.registered_practice_as_of(
-         "2020-02-01",
+         index_date,
          returning="nuts1_region_name",
          return_expectations={
              "rate": "universal",
@@ -111,12 +115,22 @@ study = StudyDefinition(
     ),
 
 
-    allpatients=patients.satisfying("""age>=0""", return_expectations={"incidence": 1}),
+    allpatients = patients.satisfying("""age>=0""", return_expectations={"incidence": 1}),
 
     cholesterol = patients.with_these_clinical_events(
         codes_cholesterol,
         returning = "number_of_episodes",
         between = ["index_date", "index_date + 1 month"],
-        return_expectations={"incidence": 0.90}
+        return_expectations={
+            "rate": "universal",
+            "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
+        },
     ),
 )
+
+
+measures = []
+for k1 in measures_dict.keys():
+    for k2 in measures_dict[k1]["groups"].keys():
+        #print(measures_dict[k1][k2])
+        measures = measures + [Measure(**measures_dict[k1]["groups"][k2]["measure_args"])]

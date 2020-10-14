@@ -7,5 +7,5 @@ from cohortextractor import (
 ## measurement codes
 
 codes_cholesterol = codelist_from_csv(
-    "codelists/cholesterol-measurement.csv", system="ctv3", column="CTV3ID"
+    "codelists/cholesterol-measurement.csv", system="ctv3", column="id"
 )
