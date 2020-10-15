@@ -1,0 +1,34 @@
+{
+    "cholesterol": {
+        "label": "Cholesterol",
+        "groups": {
+            "allpatients": {
+                "label": "overall",
+                "measure_args": {
+                    "id": "cholesterol_overall",
+                    "numerator": "cholesterol",
+                    "denominator": "population",
+                    "group_by": "allpatients"
+                }
+            },
+            "practice": {
+                "label": "by practice",
+                "measure_args": {
+                    "id": "cholesterol_practice",
+                    "numerator": "cholesterol",
+                    "denominator": "population",
+                    "group_by": "practice"
+                }
+            },
+            "stp": {
+                "label": "by STP",
+                "measure_args": {
+                    "id": "cholesterol_stp",
+                    "numerator": "cholesterol",
+                    "denominator": "population",
+                    "group_by": "stp"
+                }
+            }
+        }
+    }
+}
