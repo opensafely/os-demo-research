@@ -92,6 +92,5 @@ measures_plots %>%
   pwalk(ggsave)
 
 
-
 ## close log connection
 sink()

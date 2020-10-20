@@ -1,4 +1,5 @@
 version: '1.0'
+
 actions:
 
   generate_cohort:
@@ -7,96 +8,34 @@ actions:
       highly_sensitive:
         cohort: output/input_*.csv
 
-    generate_measures:
-        run: cohortextractor:latest generate_measures --output-dir=/workspace
-        needs: [generate_cohort]
-        outputs:
-        highly_sensitive:
-            cohort: output/measure_*.csv
-
-  calc_coverage:
-    run: r:latest rmarkdown/0 import.R input_coverage.csv msoa_pops.csv
+  generate_measures:
+    run: cohortextractor:latest generate_measures --output-dir=/workspace
     needs: [generate_cohort]
     outputs:
       moderately_sensitive:
-        log: coverage_log.txt
-        data: tpp_msoa_coverage.rds
+        measure_csv: output/measure_*.csv
 
-  data_check:
-    run: r:latest analysis/data_check.R tpp_msoa_coverage.csv msoa_shp.rds input.csv
-    needs: [generate_cohort, calc_coverage]
+  import_measures:
+    run: r:latest R/0-import.R
+    needs: [generate_measures]
     outputs:
       moderately_sensitive:
-        log: data_checks.txt
-        figure: tpp_coverage_map.png
-        figure: tpp_coverage_carehomes.png
+        log: log-0-import.txt
+        measure_rds: output/collected_measures.rds
 
-  data_setup:
-    run: r:latest analysis/data_setup.R input.csv tpp_msoa_coverage.rds
-    needs: [generate_cohort, calc_coverage]
+
+  plot_measures:
+    run: r:latest R/1-plot-measures.R
+    needs: [import_measures]
     outputs:
       moderately_sensitive:
-        log: data_setup_log.txt
-        data: community_prevalence.rds
-        figure: ch_events.png
-      highly_sensitive:
-        analysis_data: analysisdata.rds
-        input_data: input_clean.rds
-        ch_data: ch_linelist.rds
-        cg_agg_data: ch_agg_long.rds
-
-  descriptive:
-    needs: [data_setup]
-    run: r:latest analysis/descriptive.R input_clean.rds ch_linelist.rds ch_agg_long.rds community_prevalence.rds
-    outputs:
-      moderately_sensitive:
-        report: descriptive.pdf
-        log: log_descriptive.txt
-        data: ch_gp_permsoa.csv
-
-
-  run_models_50_cutoff:
-    needs: [data_setup]
-    run: r:latest analysis/run_models.R analysisdata.rds community_prevalence.rds 50
-    outputs:
-      moderately_sensitive:
-        coeffs: coeffs_bestmod_50.csv
-        output: output_model_run_50.txt
-        log: log_model_run_50.txt
-      highly_sensitive:
-        fit: fit_opt_50.rds
-        data: testdata_50.rds
-
-  validate_models_50_cutoff:
-    needs: [run_models_50_cutoff]
-    run: r:latest analysis/validate_models.R fit_opt_50.rds testdata_50.rds 50
-    outputs:
-      moderately_sensitive:
-        report: test_pred_figs_50.pdf
-
-
-  run_models_90_cutoff:
-    needs: [data_setup]
-    run: r:latest analysis/run_models.R analysisdata.rds community_prevalence.rds 90
-    outputs:
-      moderately_sensitive:
-        coeffs: coeffs_bestmod_90.csv
-        output: output_model_run_90.txt
-        log: log_model_run_90.txt
-      highly_sensitive:
-        fit: fit_opt_90.rds
-        data: testdata_90.rds
-
-  validate_models_90_cutoff:
-    needs: [run_models_90_cutoff]
-    run: r:latest analysis/validate_models.R fit_opt_90.rds testdata_90.rds 90
-    outputs:
-      moderately_sensitive:
-        report: test_pred_figs_90.pdf
+        log: 1-plot-measures.txt
+        figure: plot_*.png
+        
 
 
   run_all:
-    needs: [validate_models_90_cutoff, validate_models_50_cutoff, descriptive]
+    needs: [plot_measures]
     # In order to be valid this action needs to define a run commmand and
     # some output. We don't really care what these are but the below seems to
     # do the trick.
