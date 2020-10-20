@@ -1,0 +1,106 @@
+version: '1.0'
+actions:
+
+  generate_cohort:
+    run: cohortextractor:latest generate_cohort --study_definition study_definition --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+    outputs:
+      highly_sensitive:
+        cohort: output/input_*.csv
+
+    generate_measures:
+        run: cohortextractor:latest generate_measures --output-dir=/workspace
+        needs: [generate_cohort]
+        outputs:
+        highly_sensitive:
+            cohort: output/measure_*.csv
+
+  calc_coverage:
+    run: r:latest rmarkdown/0 import.R input_coverage.csv msoa_pops.csv
+    needs: [generate_cohort]
+    outputs:
+      moderately_sensitive:
+        log: coverage_log.txt
+        data: tpp_msoa_coverage.rds
+
+  data_check:
+    run: r:latest analysis/data_check.R tpp_msoa_coverage.csv msoa_shp.rds input.csv
+    needs: [generate_cohort, calc_coverage]
+    outputs:
+      moderately_sensitive:
+        log: data_checks.txt
+        figure: tpp_coverage_map.png
+        figure: tpp_coverage_carehomes.png
+
+  data_setup:
+    run: r:latest analysis/data_setup.R input.csv tpp_msoa_coverage.rds
+    needs: [generate_cohort, calc_coverage]
+    outputs:
+      moderately_sensitive:
+        log: data_setup_log.txt
+        data: community_prevalence.rds
+        figure: ch_events.png
+      highly_sensitive:
+        analysis_data: analysisdata.rds
+        input_data: input_clean.rds
+        ch_data: ch_linelist.rds
+        cg_agg_data: ch_agg_long.rds
+
+  descriptive:
+    needs: [data_setup]
+    run: r:latest analysis/descriptive.R input_clean.rds ch_linelist.rds ch_agg_long.rds community_prevalence.rds
+    outputs:
+      moderately_sensitive:
+        report: descriptive.pdf
+        log: log_descriptive.txt
+        data: ch_gp_permsoa.csv
+
+
+  run_models_50_cutoff:
+    needs: [data_setup]
+    run: r:latest analysis/run_models.R analysisdata.rds community_prevalence.rds 50
+    outputs:
+      moderately_sensitive:
+        coeffs: coeffs_bestmod_50.csv
+        output: output_model_run_50.txt
+        log: log_model_run_50.txt
+      highly_sensitive:
+        fit: fit_opt_50.rds
+        data: testdata_50.rds
+
+  validate_models_50_cutoff:
+    needs: [run_models_50_cutoff]
+    run: r:latest analysis/validate_models.R fit_opt_50.rds testdata_50.rds 50
+    outputs:
+      moderately_sensitive:
+        report: test_pred_figs_50.pdf
+
+
+  run_models_90_cutoff:
+    needs: [data_setup]
+    run: r:latest analysis/run_models.R analysisdata.rds community_prevalence.rds 90
+    outputs:
+      moderately_sensitive:
+        coeffs: coeffs_bestmod_90.csv
+        output: output_model_run_90.txt
+        log: log_model_run_90.txt
+      highly_sensitive:
+        fit: fit_opt_90.rds
+        data: testdata_90.rds
+
+  validate_models_90_cutoff:
+    needs: [run_models_90_cutoff]
+    run: r:latest analysis/validate_models.R fit_opt_90.rds testdata_90.rds 90
+    outputs:
+      moderately_sensitive:
+        report: test_pred_figs_90.pdf
+
+
+  run_all:
+    needs: [validate_models_90_cutoff, validate_models_50_cutoff, descriptive]
+    # In order to be valid this action needs to define a run commmand and
+    # some output. We don't really care what these are but the below seems to
+    # do the trick.
+    run: cohortextractor:latest --version
+    outputs:
+      moderately_sensitive:
+        whatever: project.yaml

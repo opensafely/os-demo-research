@@ -1,15 +1,21 @@
+## open log connection to file
+sink("log-1-plot-measures.txt")
 
 
+## import libraries
+library('tidyverse')
 
-#plot measures ------------------------------------------------------------
-
-
+## import measures data
 measures <- read_rds(here::here("output", "collected_measures.rds"))
 
+
 quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
+  ## function that takes a vector and returns a tibble of its quantiles
   tibble("{{ x }}" := quantile(x, q), "{{ x }}_q" := q)
 }
 
+
+## generate plots for each measure within the data frame
 measures_plots <- measures %>% 
   mutate(
     data_quantiles = map(data, ~ (.) %>% group_by(date) %>% summarise(quibble(value, seq(0,1,0.1)))),
@@ -57,6 +63,22 @@ measures_plots <- measures %>%
   )
 
 
+
+## plot the charts (by variable)
+measures_plots %>%
+  transmute(
+    plot = plot_by,
+    units = "cm",
+    height = 8,
+    width=12, 
+    limitsize=FALSE,
+    filename = str_c("plot_by_", id, ".png"),
+    path = here::here("output", "plots"),
+  ) %>%
+  pwalk(ggsave)
+
+
+## plot the charts (by quantile)
 measures_plots %>%
   transmute(
     plot = plot_quantiles,
@@ -70,15 +92,6 @@ measures_plots %>%
   pwalk(ggsave)
 
 
-measures_plots %>%
-  transmute(
-    plot = plot_by,
-    units = "cm",
-    height = 8,
-    width=12, 
-    limitsize=FALSE,
-    filename = str_c("plot_by_", id, ".png"),
-    path = here::here("output", "plots"),
-  ) %>%
-  pwalk(ggsave)
 
+## close log connection
+sink()
