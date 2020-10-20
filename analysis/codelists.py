@@ -9,3 +9,7 @@ from cohortextractor import (
 codes_cholesterol = codelist_from_csv(
     "codelists/cholesterol-measurement.csv", system="ctv3", column="id"
 )
+
+codes_inr = codelist_from_csv(
+    "codelists/international-normalised-ratio-measurement.csv", system="ctv3", column="id"
+)

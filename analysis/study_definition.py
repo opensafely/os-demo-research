@@ -126,6 +126,16 @@ study = StudyDefinition(
             "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
         },
     ),
+
+    inr = patients.with_these_clinical_events(
+        codes_inr,
+        returning = "number_of_episodes",
+        between = ["index_date", "index_date + 1 month"],
+        return_expectations={
+            "rate": "universal",
+            "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
+        },
+    ),
 )
 
 
