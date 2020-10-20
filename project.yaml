@@ -1,0 +1,45 @@
+version: '1.0'
+
+actions:
+
+  generate_cohort:
+    run: cohortextractor:latest generate_cohort --study_definition study_definition --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+    outputs:
+      highly_sensitive:
+        cohort: output/input_*.csv
+
+  generate_measures:
+    run: cohortextractor:latest generate_measures --output-dir=/workspace
+    needs: [generate_cohort]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/measure_*.csv
+
+  import_measures:
+    run: r:latest R/0-import.R
+    needs: [generate_measures]
+    outputs:
+      moderately_sensitive:
+        log: log-0-import.txt
+        measure_rds: output/collected_measures.rds
+
+
+  plot_measures:
+    run: r:latest R/1-plot-measures.R
+    needs: [import_measures]
+    outputs:
+      moderately_sensitive:
+        log: 1-plot-measures.txt
+        figure: plot_*.png
+        
+
+
+  run_all:
+    needs: [plot_measures]
+    # In order to be valid this action needs to define a run commmand and
+    # some output. We don't really care what these are but the below seems to
+    # do the trick.
+    run: cohortextractor:latest --version
+    outputs:
+      moderately_sensitive:
+        whatever: project.yaml
