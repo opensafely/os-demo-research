@@ -15,7 +15,7 @@ from cohortextractor import (
 from codelists import *
 
 # import utility functions from lib folder
-from lib.measures_dict import measures_dict
+from measures_dict import measures_dict
 
 ## STUDY POPULATION
 # Defines both the study population and points to the important covariates
