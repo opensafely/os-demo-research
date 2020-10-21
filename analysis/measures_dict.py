@@ -71,5 +71,5 @@ measures_dict = dict(
 )
 
 
-with open('measures_dict.json', 'w') as fp:
+with open('../measures_dict.json', 'w') as fp:
     json.dump(measures_dict, fp, indent=4)
