@@ -2,15 +2,32 @@ version: '1.0'
 
 actions:
 
-  generate_cohort:
-    run: cohortextractor:latest generate_cohort --study_definition study_definition --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+  generate_cohort_deaths:
+    run: cohortextractor:latest generate_cohort --study_definition study_definition_deaths --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
     outputs:
       highly_sensitive:
-        cohort: output/input_*.csv
+        cohort: output/input_deaths.csv
+
+
+  plot_deaths:
+    run: r:latest R/1-plot-deaths.R
+    needs: [generate_cohort_deaths]
+    outputs:
+      moderately_sensitive:
+        log: log-1-plot-deaths.txt
+        measure_rds: output/plots/plot_deaths.png
+
+
+
+  generate_cohort_measures:
+    run: cohortextractor:latest generate_cohort --study_definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+    outputs:
+      highly_sensitive:
+        cohort: output/input_activity_*.csv
 
   generate_measures:
     run: cohortextractor:latest generate_measures --output-dir=/workspace
-    needs: [generate_cohort]
+    needs: [generate_cohort_measures]
     outputs:
       moderately_sensitive:
         measure_csv: output/measure_*.csv
@@ -23,16 +40,14 @@ actions:
         log: log-0-import.txt
         measure_rds: output/collected_measures.rds
 
-
   plot_measures:
     run: r:latest R/1-plot-measures.R
     needs: [import_measures]
     outputs:
       moderately_sensitive:
-        log: 1-plot-measures.txt
-        figure: plot_*.png
+        log: log-1-plot-measures.txt
+        figure: output/plots/plot_*.png
         
-
 
   run_all:
     needs: [plot_measures]
