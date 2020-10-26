@@ -11,8 +11,8 @@ sink("log-1-plot-deaths.txt")
 args <- commandArgs(trailingOnly=TRUE)
 
 ## import measures data
-#data_input <- read_csv(here::here("output", "input_deaths.csv"), col_types = "iDDDdddcc")
-data_input <- read_csv(args[1], col_types = "iDDDdddcc")
+data_input <- read_csv(here::here("output", "input_deaths.csv"), col_types = "iDDDdddcc")
+#data_input <- read_csv(args[1], col_types = "iDDDdddcc")
 
 
 data_cleaned <- data_input %>%
