@@ -18,12 +18,12 @@ md_tbl <- md_list %>%
 ## import measures data
 measures <- md_tbl %>%
   mutate(
-    data = map(id, ~read_csv(here::here("output",glue::glue("measure_{.}.csv")))),
+    data = map(id, ~read_csv(here::here("output","measures",glue::glue("measure_{.}.csv")))),
     plot_q = map()
   )
 
 ## save to file
-write_rds(measures, here::here("output", "collected_measures.rds"), compress="xz")
+write_rds(measures, here::here("output","measures", "collected_measures.rds"), compress="xz")
 
 
 

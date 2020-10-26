@@ -1,9 +1,12 @@
-version: '1.0'
+version: '3.0'
+
+expectations:
+  population_size: 1000
 
 actions:
 
   generate_cohort_deaths:
-    run: cohortextractor:latest generate_cohort --study_definition study_definition_deaths --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_deaths
     outputs:
       highly_sensitive:
         cohort: output/input_deaths.csv
@@ -15,22 +18,20 @@ actions:
     outputs:
       moderately_sensitive:
         log: log-1-plot-deaths.txt
-        measure_rds: output/plots/plot_deaths.png
-
-
+        figure: output/plots/plot_deaths.png
 
   generate_cohort_measures:
-    run: cohortextractor:latest generate_cohort --study_definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir /output/measures/
     outputs:
       highly_sensitive:
-        cohort: output/input_activity_*.csv
+        cohort: output/cohorts/input_activity_*.csv
 
   generate_measures:
-    run: cohortextractor:latest generate_measures --output-dir=/workspace
+    run: cohortextractor:latest generate_measures --output-dir=/output/measures/
     needs: [generate_cohort_measures]
     outputs:
       moderately_sensitive:
-        measure_csv: output/measure_*.csv
+        measure_csv: output/measures/measure_cholesterol_overall.csv output/measures/measure_cholesterol_practice.csv output/measures/measure_cholesterol_stp.csv output/measures/measure_inr_overall.csv output/measures/measure_inr_practice.csv output/measures/measure_inr_stp.csv
 
   import_measures:
     run: r:latest R/0-import.R
@@ -38,15 +39,20 @@ actions:
     outputs:
       moderately_sensitive:
         log: log-0-import.txt
-        measure_rds: output/collected_measures.rds
+        measure_rds: output/measures/collected_measures.rds
 
-  plot_measures:
-    run: r:latest R/1-plot-measures.R
-    needs: [import_measures]
-    outputs:
-      moderately_sensitive:
-        log: log-1-plot-measures.txt
-        figure: output/plots/plot_*.png
+  #plot_measures:
+  #  run: r:latest R/1-plot-measures.R
+  #  needs: [import_measures]
+  #  outputs:
+  #    moderately_sensitive:
+  #      log: log-1-plot-measures.txt
+  #      figure: output/plots/plot_each_cholesterol_overall.png output/plots/plot_each_cholesterol_practice.png
+  #      output/plots/plot_each_cholesterol_stp.png output/plots/plot_each_inr_overall.png output/plots/plot_each_inr_practice.png
+  #      output/plots/plot_each_inr_stp.png
+  #      output/plots/plot_quantiles_cholesterol_overall.png output/plots/plot_quantiles_cholesterol_practice.png
+  #      output/plots/plot_quantiles_cholesterol_stp.png output/plots/plot_quantiles_inr_overall.png output/plots/plot_quantiles_inr_practice.png
+  #      output/plots/plot_quantile_inr_stp.png
         
 
   run_all:

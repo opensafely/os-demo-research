@@ -6,7 +6,7 @@ sink("log-1-plot-measures.txt")
 library('tidyverse')
 
 ## import measures data
-measures <- read_rds(here::here("output", "collected_measures.rds"))
+measures <- read_rds(here::here("output","measures", "collected_measures.rds"))
 
 
 quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
@@ -72,7 +72,7 @@ measures_plots %>%
     height = 8,
     width=12, 
     limitsize=FALSE,
-    filename = str_c("plot_by_", id, ".png"),
+    filename = str_c("plot_each_", id, ".png"),
     path = here::here("output", "plots"),
   ) %>%
   pwalk(ggsave)
