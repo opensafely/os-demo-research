@@ -1,8 +1,9 @@
 
 
 ## import libraries
-library('tidyverse')
-library('lubridate')
+#library('tidyverse')
+#library('lubridate')
+pacman::p_load("tidyverse","lubridate")
 
 ## open log connection to file
 sink("log-1-plot-deaths.txt")
