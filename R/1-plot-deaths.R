@@ -46,7 +46,10 @@ ggplot() +
     legend.background = element_blank()
     #plot.margin = margin(0, 0, 0, 0, "pt"),
   )
-plot_deaths
+
+
+
+fs::dir_create(here::here("output", "plots"))
 
 ggsave(
   plot= plot_deaths, 
