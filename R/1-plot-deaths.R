@@ -1,10 +1,11 @@
-## open log connection to file
-sink("log-1-plot-deaths.txt")
 
 
 ## import libraries
 library('tidyverse')
 library('lubridate')
+
+## open log connection to file
+sink("log-1-plot-deaths.txt")
 
 ## import measures data
 data_input <- read_csv(here::here("output", "input_deaths.csv"), col_types = "iDDDdddcc")
