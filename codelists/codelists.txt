@@ -1,1 +1,1 @@
-opensafely/chronic-cardiac-disease/2020-04-08
+opensafely/covid-identification/2020-06-03

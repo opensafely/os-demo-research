@@ -14,15 +14,12 @@ from cohortextractor import (
 # All codelist are held within the codelist/ folder.
 from codelists import *
 
-# import utility functions from lib folder
-from measures_dict import measures_dict
-
 ## STUDY POPULATION
 # Defines both the study population and points to the important covariates
 
 index_date = "2020-01-01"
-date_end = "2020-09-01"
-today = "2020-09-21"
+date_end = "2020-10-01"
+today = "2020-10-21"
 
 
 study = StudyDefinition(
@@ -139,8 +136,42 @@ study = StudyDefinition(
 )
 
 
-measures = []
-for k1 in measures_dict.keys():
-    for k2 in measures_dict[k1]["groups"].keys():
-        #print(measures_dict[k1][k2])
-        measures = measures + [Measure(**measures_dict[k1]["groups"][k2]["measure_args"])]
+measures = [
+    Measure(
+        id="cholesterol_overall",
+        numerator="cholesterol",
+        denominator="population",
+        group_by="allpatients"
+    ),
+    Measure(
+        id="cholesterol_practice",
+        numerator="cholesterol",
+        denominator="population",
+        group_by="practice"
+    ),
+    Measure(
+        id="cholesterol_stp",
+        numerator="cholesterol",
+        denominator="population",
+        group_by="stp"
+    ),
+    Measure(
+        id="inr_overall",
+        numerator="inr",
+        denominator="population",
+        group_by="allpatients"
+    ),
+    Measure(
+        id="inr_practice",
+        numerator="inr",
+        denominator="population",
+        group_by="practice"
+    ),
+    Measure(
+        id="inr_stp",
+        numerator="inr",
+        denominator="population",
+        group_by="stp"
+    ),
+]
+

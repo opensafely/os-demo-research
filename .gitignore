@@ -6,7 +6,7 @@ model.log
 __pycache__
 .python-version
 output/*
-
+tmp-storage/*
 
 ## notebook files
 
@@ -30,9 +30,6 @@ __pycache__/
 
 # Emacs
 *~
-
-
-#run.exe
 
 ## R files
 *.rproj
