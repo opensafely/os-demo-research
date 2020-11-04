@@ -3,7 +3,7 @@ version: '1.0'
 actions:
 
   generate_cohort:
-    run: cohortextractor:latest generate_cohort --study_definition study_definition --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
+    run: cohortextractor:latest generate_cohort --study-definition study_definition --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=/workspace
     outputs:
       highly_sensitive:
         cohort: output/input_*.csv
