@@ -33,11 +33,11 @@ quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
 measures_plots <- measures %>% 
   mutate(
     data_quantiles = map(data, ~ (.) %>% group_by(date) %>% summarise(quibble(value, seq(0,1,0.1)))),
-    plot_by = pmap(lst( group, data, measure_label, by_label), 
-                  function(group, data, measure_label, by_label){
+    plot_by = pmap(lst( group_by, data, measure_label, by_label), 
+                  function(group_by, data, measure_label, by_label){
                     data %>% mutate(value_10000 = value*10000) %>%
                     ggplot()+
-                      geom_line(aes_string(x="date", y="value_10000", group=group), alpha=0.1, colour='blue')+
+                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.1, colour='blue')+
                       labs(
                         x="Date", y=NULL, 
                         title=glue::glue("{measure_label} measurement per 10,000 patients"),
@@ -52,8 +52,8 @@ measures_plots <- measures %>%
                       )
                   }
     ),
-    plot_quantiles = pmap(lst( group, data_quantiles, measure_label, by_label), 
-                  function(group, data_quantiles, measure_label, by_label){
+    plot_quantiles = pmap(lst( group_by, data_quantiles, measure_label, by_label), 
+                  function(group_by, data_quantiles, measure_label, by_label){
                     data_quantiles %>% mutate(value_10000 = value*10000) %>%
                       ggplot()+
                       geom_line(aes(x=date, y=value_10000, group=value_q, linetype=value_q==0.5, size=value_q==0.5), colour='blue')+
