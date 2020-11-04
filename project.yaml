@@ -9,7 +9,7 @@ actions:
         cohort: output/input_*.csv
 
   generate_measures:
-    run: cohortextractor:latest generate_measures --output-dir=/workspace
+    run: cohortextractor:latest generate_measures --output-dir=/workspace/output
     needs: [generate_cohort]
     outputs:
       moderately_sensitive:
