@@ -1,5 +1,5 @@
 ## open log connection to file
-sink("log-0-input.txt")
+sink(here::here("output", "logs","log-0-import.txt"))
 
 
 ## import libraries
@@ -7,7 +7,7 @@ library('tidyverse')
 library('jsonlite')
 
 ## import measures dictionary and refactor into tibble
-md_list <- jsonlite::fromJSON(here::here("lib","measures_dict.json"), simplifyVector = FALSE, flatten=FALSE)
+md_list <- jsonlite::fromJSON(here::here("lib", "measures_dict.json"), simplifyVector = FALSE, flatten=FALSE)
 md_tbl <- md_list %>%
   enframe(name="measure", value="dictionary") %>%
   unnest_wider(dictionary) %>% 
@@ -18,14 +18,12 @@ md_tbl <- md_list %>%
 ## import measures data
 measures <- md_tbl %>%
   mutate(
-    data = map(id, ~read_csv(here::here("output","measures",glue::glue("measure_{.}.csv")))),
-    plot_q = map()
+    data = map(id, ~read_csv(here::here("output", "measures", glue::glue("measure_{.}.csv")))),
   )
 
 ## save to file
-write_rds(measures, here::here("output","measures", "collected_measures.rds"), compress="xz")
+write_rds(measures, here::here("output", "measures", "collected_measures.rds"), compress="xz")
 
-
-
+print("x ")
 ## close log connection
 sink()

@@ -1,12 +1,12 @@
 ## open log connection to file
-sink("log-1-plot-measures.txt")
+sink(here::here("output", "logs","log-1-plot-measures.txt"))
 
 
 ## import libraries
 library('tidyverse')
 
 ## import measures data
-measures <- read_rds(here::here("output","measures", "collected_measures.rds"))
+measures <- read_rds(here::here("output", "measures", "collected_measures.rds"))
 
 
 quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
@@ -63,6 +63,7 @@ measures_plots <- measures %>%
   )
 
 
+fs::dir_create(here::here("output", "plots"))
 
 ## plot the charts (by variable)
 measures_plots %>%

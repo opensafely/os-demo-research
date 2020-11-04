@@ -6,57 +6,62 @@ expectations:
 actions:
 
   generate_cohort_deaths:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_deaths
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_deaths --output-dir=output/cohorts
     outputs:
       highly_sensitive:
-        cohort: output/input_deaths.csv
+        cohort: output/cohorts/input_deaths.csv
 
 
   plot_deaths:
-    run: r:latest R/1-plot-deaths.R output/input_deaths.csv
+    run: r:latest R/1-plot-deaths.R
     needs: [generate_cohort_deaths]
     outputs:
       moderately_sensitive:
-        log: log-1-plot-deaths.txt
+        log: output/logs/log-1-plot-deaths.txt
         figure: output/plots/plot_deaths.png
 
-  generate_cohort_measures:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir /output/measures/
+
+
+  generate_cohort_activity:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
     outputs:
       highly_sensitive:
-        cohort: output/cohorts/input_activity_*.csv
+        cohort: output/measures/input_activity_*.csv
 
-  generate_measures:
-    run: cohortextractor:latest generate_measures --output-dir=/output/measures/
-    needs: [generate_cohort_measures]
+  generate_measures_activity:
+    run: cohortextractor:latest generate_measures --study-definition study_definition_activity --output-dir=output/measures
+    needs: [generate_cohort_activity]
     outputs:
       moderately_sensitive:
-        measure_csv: output/measures/measure_cholesterol_overall.csv output/measures/measure_cholesterol_practice.csv output/measures/measure_cholesterol_stp.csv output/measures/measure_inr_overall.csv output/measures/measure_inr_practice.csv output/measures/measure_inr_stp.csv
+        measure_csv: output/measures/measure_*.csv 
+
+        #measure_csv: output/measure_cholesterol_overall.csv output/measure_cholesterol_practice.csv #output/measure_cholesterol_stp.csv output/measure_inr_overall.csv output/measure_inr_practice.csv output/measure_inr_stp.csv
 
   import_measures:
     run: r:latest R/0-import.R
-    needs: [generate_measures]
+    needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
-        log: log-0-import.txt
+        log: output/logs/log-0-import.txt
         measure_rds: output/measures/collected_measures.rds
 
-  #plot_measures:
-  #  run: r:latest R/1-plot-measures.R
-  #  needs: [import_measures]
-  #  outputs:
-  #    moderately_sensitive:
-  #      log: log-1-plot-measures.txt
-  #      figure: output/plots/plot_each_cholesterol_overall.png output/plots/plot_each_cholesterol_practice.png
-  #      output/plots/plot_each_cholesterol_stp.png output/plots/plot_each_inr_overall.png output/plots/plot_each_inr_practice.png
-  #      output/plots/plot_each_inr_stp.png
-  #      output/plots/plot_quantiles_cholesterol_overall.png output/plots/plot_quantiles_cholesterol_practice.png
-  #      output/plots/plot_quantiles_cholesterol_stp.png output/plots/plot_quantiles_inr_overall.png output/plots/plot_quantiles_inr_practice.png
-  #      output/plots/plot_quantile_inr_stp.png
+  plot_measures:
+    run: r:latest R/1-plot-measures.R
+    needs: [import_measures]
+    outputs:
+      moderately_sensitive:
+        log: output/logs/log-1-plot-measures.txt
+        figure: output/plots/plot_*.png
+        #figure: output/plots/plot_each_cholesterol_overall.png output/plots/plot_each_cholesterol_practice.pngcohortextractor
+        #output/plots/plot_each_cholesterol_stp.png output/plots/plot_each_inr_overall.png output/plots/plot_each_inr_practice.png
+        #output/plots/plot_each_inr_stp.png
+        #output/plots/plot_quantiles_cholesterol_overall.png output/plots/plot_quantiles_cholesterol_practice.png
+        #output/plots/plot_quantiles_cholesterol_stp.png output/plots/plot_quantiles_inr_overall.png output/plots/plot_quantiles_inr_practice.png
+        #output/plots/plot_quantile_inr_stp.png
         
 
   run_all:
-    needs: [plot_measures]
+    needs: [plot_measures, plot_deaths]
     # In order to be valid this action needs to define a run commmand and
     # some output. We don't really care what these are but the below seems to
     # do the trick.

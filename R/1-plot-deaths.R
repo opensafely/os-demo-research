@@ -6,12 +6,12 @@ library('lubridate')
 #pacman::p_load("tidyverse","lubridate")
 
 ## open log connection to file
-sink("log-1-plot-deaths.txt")
+sink(here::here("output", "logs", "log-1-plot-deaths.txt"))
 
-args <- commandArgs(trailingOnly=TRUE)
+#args <- commandArgs(trailingOnly=TRUE)
 
 ## import measures data
-data_input <- read_csv(here::here("output", "input_deaths.csv"), col_types = "iDDDdddcc")
+data_input <- read_csv(here::here("output", "cohorts", "input_deaths.csv"), col_types = "iDDDdddcc")
 #data_input <- read_csv(args[1], col_types = "iDDDdddcc")
 
 
@@ -61,7 +61,7 @@ ggsave(
   filename="plot_deaths.png", path=here::here("output", "plots"), 
   units = "cm",
   height = 8,
-  width=12
+  width = 12
 )
 
 ## close log connection
