@@ -5,6 +5,9 @@ expectations:
 
 actions:
 
+
+# actions to plot deaths over time
+
   generate_cohort_deaths:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_deaths --output-dir=output/cohorts
     outputs:
@@ -13,14 +16,14 @@ actions:
 
 
   plot_deaths:
-    run: r:latest R/1-plot-deaths.R
+    run: r:latest analysis/1-plot-deaths.R
     needs: [generate_cohort_deaths]
     outputs:
       moderately_sensitive:
         log: output/logs/log-1-plot-deaths.txt
         figure: output/plots/plot_deaths.png
 
-
+# actions to plot gp activity over time
 
   generate_cohort_activity:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
@@ -35,30 +38,14 @@ actions:
       moderately_sensitive:
         measure_csv: output/measures/measure_*.csv 
 
-        #measure_csv: output/measure_cholesterol_overall.csv output/measure_cholesterol_practice.csv #output/measure_cholesterol_stp.csv output/measure_inr_overall.csv output/measure_inr_practice.csv output/measure_inr_stp.csv
-
-  import_measures:
-    run: r:latest R/0-import.R
-    needs: [generate_measures_activity]
-    outputs:
-      moderately_sensitive:
-        log: output/logs/log-0-import.txt
-        measure_rds: output/measures/collected_measures.rds
-
   plot_measures:
-    run: r:latest R/1-plot-measures.R
-    needs: [import_measures]
+    run: r:latest analysis/1-plot-measures.R
+    needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
         log: output/logs/log-1-plot-measures.txt
         figure: output/plots/plot_*.png
-        #figure: output/plots/plot_each_cholesterol_overall.png output/plots/plot_each_cholesterol_practice.pngcohortextractor
-        #output/plots/plot_each_cholesterol_stp.png output/plots/plot_each_inr_overall.png output/plots/plot_each_inr_practice.png
-        #output/plots/plot_each_inr_stp.png
-        #output/plots/plot_quantiles_cholesterol_overall.png output/plots/plot_quantiles_cholesterol_practice.png
-        #output/plots/plot_quantiles_cholesterol_stp.png output/plots/plot_quantiles_inr_overall.png output/plots/plot_quantiles_inr_practice.png
-        #output/plots/plot_quantile_inr_stp.png
-        
+       
 
   run_all:
     needs: [plot_measures, plot_deaths]

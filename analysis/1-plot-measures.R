@@ -5,8 +5,23 @@ sink(here::here("output", "logs","log-1-plot-measures.txt"))
 ## import libraries
 library('tidyverse')
 
-## import measures data
-measures <- read_rds(here::here("output", "measures", "collected_measures.rds"))
+# create measures look-up
+md_tbl <- tibble(
+  measure = c("cholesterol", "cholesterol", "cholesterol", "inr", "inr", "inr"),
+  measure_label = c("Cholesterol", "Cholesterol", "Cholesterol", "INR", "INR", "INR"),
+  by = c("overall", "practice", "stp", "overall", "practice", "stp"),
+  by_label = c("overall", "by practice", "by STP", "overall", "by practice", "by STP"),
+  id = paste0(measure, "_", by),
+  numerator = measure,
+  denominator = "population",
+  group_by = c("allpatients", "practice", "stp", "allpatients", "practice", "stp"),
+)
+
+## import measures data from look-up
+measures <- md_tbl %>%
+  mutate(
+    data = map(id, ~read_csv(here::here("output", "measures", glue::glue("measure_{.}.csv")))),
+  )
 
 
 quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
@@ -14,20 +29,19 @@ quibble <- function(x, q = c(0.25, 0.5, 0.75)) {
   tibble("{{ x }}" := quantile(x, q), "{{ x }}_q" := q)
 }
 
-
 ## generate plots for each measure within the data frame
 measures_plots <- measures %>% 
   mutate(
     data_quantiles = map(data, ~ (.) %>% group_by(date) %>% summarise(quibble(value, seq(0,1,0.1)))),
-    plot_by = pmap(lst( group, data, var_label, label), 
-                  function(group, data, var_label, label){
+    plot_by = pmap(lst( group, data, measure_label, by_label), 
+                  function(group, data, measure_label, by_label){
                     data %>% mutate(value_10000 = value*10000) %>%
                     ggplot()+
                       geom_line(aes_string(x="date", y="value_10000", group=group), alpha=0.1, colour='blue')+
                       labs(
                         x="Date", y=NULL, 
-                        title=glue::glue("{var_label} measurement per 10,000 patients"),
-                        subtitle = label
+                        title=glue::glue("{measure_label} measurement per 10,000 patients"),
+                        subtitle = by_label
                       )+
                       theme_bw()+
                       theme(
@@ -38,8 +52,8 @@ measures_plots <- measures %>%
                       )
                   }
     ),
-    plot_quantiles = pmap(lst( group, data_quantiles, var_label, label), 
-                  function(group, data_quantiles, var_label, label){
+    plot_quantiles = pmap(lst( group, data_quantiles, measure_label, by_label), 
+                  function(group, data_quantiles, measure_label, by_label){
                     data_quantiles %>% mutate(value_10000 = value*10000) %>%
                       ggplot()+
                       geom_line(aes(x=date, y=value_10000, group=value_q, linetype=value_q==0.5, size=value_q==0.5), colour='blue')+
@@ -47,8 +61,8 @@ measures_plots <- measures %>%
                       scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.7), guide=FALSE)+
                       labs(
                         x="Date", y=NULL, 
-                        title=glue::glue("{var_label} measurement per 10,000 patients"),
-                        subtitle = glue::glue("Quantiles {label}")
+                        title=glue::glue("{measure_label} measurement per 10,000 patients"),
+                        subtitle = glue::glue("Quantiles {by_label}")
                       )+
                       theme_bw()+
                       theme(
