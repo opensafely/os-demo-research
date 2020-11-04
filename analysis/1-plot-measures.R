@@ -37,7 +37,7 @@ measures_plots <- measures %>%
                   function(group_by, data, measure_label, by_label){
                     data %>% mutate(value_10000 = value*10000) %>%
                     ggplot()+
-                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.1, colour='blue')+
+                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue')+
                       labs(
                         x="Date", y=NULL, 
                         title=glue::glue("{measure_label} measurement per 10,000 patients"),

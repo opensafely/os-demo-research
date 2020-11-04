@@ -12,8 +12,6 @@ sink(here::here("output", "logs", "log-1-plot-deaths.txt"))
 
 ## import measures data
 data_input <- read_csv(here::here("output", "cohorts", "input_deaths.csv"), col_types = "iDDDdddcc")
-#data_input <- read_csv(args[1], col_types = "iDDDdddcc")
-
 
 data_cleaned <- data_input %>%
   mutate(
@@ -22,14 +20,22 @@ data_cleaned <- data_input %>%
       sex=="M" ~ "Male",
       TRUE ~ sex
     ),
+    age_group = cut(
+      age,
+      breaks = c(0,18,40,50,60,70,80, Inf),
+      #labels = ,
+      dig.lab = 2,
+    ),
+    time_to_death = if_else(is.na(date_death), as.Date("2020-10-01") - as.Date("2020-01-01"), as.Date(date_death) - as.Date("2020-01-01")),
+    event = !is.na(date_death)
   )
 
 death_day <- data_cleaned %>%
   filter(!is.na(date_death)) %>%
   group_by(date_death, death_category, sex) %>%
-  summarise(n=n())
+  summarise(n=n(), .groups="drop")
 
-plot_deaths <- death_day %>% ungroup() %>%
+plot_deaths <- death_day %>%
 ggplot() +
   #geom_line(aes(x=date_death, y=n, colour=death_category))+
   geom_bar(aes(x=date_death, y=n, fill=death_category), stat="identity")+
@@ -63,6 +69,20 @@ ggsave(
   height = 8,
   width = 12
 )
+
+
+survival::survfit(
+  survival::Surv(time=time_to_death, event=event) ~ age_group, 
+  data = data_cleaned
+) %>%
+  survminer::ggsurvplot(
+    conf.int = TRUE,
+    ggtheme = theme_minimal(), 
+    palette = viridis::viridis_pal()(n_distinct(data_cleaned$age_group)),
+    xlim = c(0, 300),
+    ylim = c(0.95, 1),
+    break.x.by = 100
+  )
 
 ## close log connection
 sink()
