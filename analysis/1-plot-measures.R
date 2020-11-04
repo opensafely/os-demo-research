@@ -57,7 +57,7 @@ measures_plots <- measures %>%
                     data_quantiles %>% mutate(value_10000 = value*10000) %>%
                       ggplot()+
                       geom_line(aes(x=date, y=value_10000, group=value_q, linetype=value_q==0.5, size=value_q==0.5), colour='blue')+
-                      scale_linetype_manual(breaks=c(TRUE, FALSE), values=c("dashed", "dotted"), guide=FALSE)+
+                      scale_linetype_manual(breaks=c(TRUE, FALSE), values=c("solid", "dotted"), guide=FALSE)+
                       scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.7), guide=FALSE)+
                       labs(
                         x="Date", y=NULL, 
