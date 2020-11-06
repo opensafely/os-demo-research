@@ -2,15 +2,26 @@
 
 ## import libraries
 library('tidyverse')
-#pacman::p_load("tidyverse","lubridate")
 
 ## open log connection to file
 sink(here::here("output", "logs", "log-1-plot-deaths.txt"))
 
-#args <- commandArgs(trailingOnly=TRUE)
-
 ## import measures data
-data_input <- read_csv(here::here("output", "cohorts", "input_deaths.csv"), col_types = "iDDDdddcc")
+data_input <- read_csv(
+  here::here("output", "cohorts", "input_deaths.csv"), 
+  col_types = cols(
+    patient_id = col_integer(),
+    registered = col_double(), # should be int but it doesn't like it
+    died = col_double(), # should be int but it doesn't like it
+    age = col_double(),
+    sex = col_character(),
+    date_covidany_death = col_date(format="%Y-%m-%d"),
+    date_covidunderlying_death = col_date(format="%Y-%m-%d"),
+    date_death = col_date(format="%Y-%m-%d"),
+    death_category = col_character()
+
+  )
+)
 
 data_cleaned <- data_input %>%
   mutate(
@@ -54,8 +65,8 @@ ggplot() +
   )
 
 
-
-fs::dir_create(here::here("output", "plots"))
+#not currently needed
+#fs::dir_create(here::here("output", "plots"))
 
 ggsave(
   plot= plot_deaths, 
