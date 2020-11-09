@@ -101,8 +101,8 @@ plot_cmlcoviddeaths_age <- deaths_tte %>%
   )
 
 ggsave(
-  plot= plot_cmldeaths_age, 
-  filename="plot_cmldeaths_age.png", path=here::here("output", "plots"), 
+  plot= plot_cmlcoviddeaths_age, 
+  filename="plot_cmlcoviddeaths_age.png", path=here::here("output", "plots"), 
   units = "cm",
   height = 8,
   width = 12

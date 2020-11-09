@@ -20,7 +20,7 @@ df_input <- read_csv(
   )
 )
 
-df_stppop = data_input %>%
+df_stppop = df_input %>%
   filter(is.na(died)) %>%
   group_by(stp) %>%
   summarise(
@@ -29,7 +29,8 @@ df_stppop = data_input %>%
 
 # from https://openprescribing.net/api/1.0/org_location/?format=json&org_type=stp
 # not importing directly from URL because no access on the server
-sf_stp <- geojson_sf(here::here("lib", "STPshapefile.json")) 
+sf_stp <- st_read(here::here("lib", "STPshapefile.json"))
+
 
 sf_stppop <- sf_stp %>% 
   left_join(df_stppop, by = c("ons_code" = "stp"))
