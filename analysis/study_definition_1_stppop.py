@@ -1,4 +1,4 @@
-## Import libraries
+## LIBRARIES
 
 # cohort extractor
 from cohortextractor import (
@@ -11,9 +11,7 @@ from cohortextractor import (
     combine_codelists
 )
 
-# All codelist are held within the codelist/ folder.
-from codelists import *
-
+# dictionary of STP codes (for dummy data)
 from dictionaries import dict_stp
 
 ## STUDY POPULATION

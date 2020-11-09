@@ -7,7 +7,7 @@ sink(here::here("output", "logs", "log-2-plot-deaths.txt"))
 library('tidyverse')
 
 ## import measures data
-data_input <- read_csv(
+df_input <- read_csv(
   here::here("output", "cohorts", "input_2_deaths.csv"), 
   col_types = cols(
     patient_id = col_integer(),
@@ -15,15 +15,13 @@ data_input <- read_csv(
     died = col_double(), # should be int but it doesn't like it
     age = col_double(),
     sex = col_character(),
-    date_covidany_death = col_date(format="%Y-%m-%d"),
-    date_covidunderlying_death = col_date(format="%Y-%m-%d"),
     date_death = col_date(format="%Y-%m-%d"),
     death_category = col_character()
 
   )
 )
 
-data_cleaned <- data_input %>%
+df_cleaned <- df_input %>%
   mutate(
     sex = case_when(
       sex=="F" ~ "Female",
@@ -36,22 +34,20 @@ data_cleaned <- data_input %>%
       #labels = ,
       dig.lab = 2,
     ),
-    time_to_death = if_else(is.na(date_death), as.Date("2020-10-01") - as.Date("2020-01-01"), as.Date(date_death) - as.Date("2020-01-01")),
-    event = !is.na(date_death)
+    time_to_coviddeath = if_else(is.na(date_death), as.Date("2020-10-01") - as.Date("2020-01-01"), as.Date(date_death) - as.Date("2020-01-01")),
+    event = (!is.na(date_death)) & (death_category == "covid-death")
   )
 
-death_day <- data_cleaned %>%
+df_deathsperday <- df_cleaned %>%
   filter(!is.na(date_death)) %>%
   group_by(date_death, death_category, sex) %>%
   summarise(n=n(), .groups="drop")
 
-plot_deaths <- death_day %>%
+plot_deaths <- df_deathsperday %>%
 ggplot() +
-  #geom_line(aes(x=date_death, y=n, colour=death_category))+
-  geom_bar(aes(x=date_death, y=n, fill=death_category), stat="identity")+
-  #directlabels::geom_dl(aes(x=date_death, y=n, colour=death_category, label = death_category), method = "last.qp")+
+  geom_bar(aes(x=date_death, y=n, fill=death_category), stat="identity", colour="transparent")+
   facet_grid(cols=vars(sex))+
-  labs(x=NULL, y=NULL, fill=NULL, title="Daily deaths")+
+  labs(x=NULL, y=NULL, fill=NULL, title="Daily deaths, covid versus non-covid")+
   scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
   scale_y_continuous(expand = c(0, 0))+
   scale_fill_brewer(palette="Set2")+
@@ -59,13 +55,10 @@ ggplot() +
   theme_minimal()+
   theme(
     axis.line.x = element_line(colour = "black"),
+    axis.text.x = element_text(angle = 70, vjust = 1, hjust=1),
     panel.grid.major.x = element_blank(),
     panel.grid.minor.x = element_blank()
   )
-
-
-#not currently needed
-#fs::dir_create(here::here("output", "plots"))
 
 ggsave(
   plot= plot_deaths, 
@@ -78,7 +71,7 @@ ggsave(
 
 deaths_tte <- survival::survfit(
     survival::Surv(time=time_to_death, event=event) ~ age_group, 
-    data = data_cleaned
+    data = df_cleaned %>% filter()
   ) %>% 
   broom::tidy() %>%
   group_by(strata) %>%
@@ -87,23 +80,24 @@ deaths_tte <- survival::survfit(
   unnest(data) %>%
   mutate(
     age_group = stringr::str_remove(strata, "age_group="),
-    leadtime = lead(time,n=1,default = Inf)
+    leadtime = lead(time, n=1, default = NA)
   )
 
-plot_cmldeaths_age <- deaths_tte %>%
+plot_cmlcoviddeaths_age <- deaths_tte %>%
   ggplot()+
   geom_step(aes(x=time, y=1-estimate, group=age_group, colour=age_group))+
   geom_rect(aes(xmin=time, xmax= leadtime, ymin=1-conf.high, ymax=1-conf.low, group=age_group, fill=age_group), alpha=0.1, colour=NA)+
   scale_fill_viridis_d(guide=FALSE)+
   scale_colour_viridis_d()+
+  scale_y_continuous(expand = c(0,0))+
   labs(x="Days since 1 Jan 2020", y="Death rate", colour="Age",
-       title="Cumulative death rate by age group")+
+       title="Cumulative covid death rate",
+       subtitle = "by age group")+
   theme_minimal()+
   theme(
     axis.line.x = element_line(colour = "black"),
     panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    legend.position = c(0.05, 0.05), legend.justification = c(0,0),
+    panel.grid.minor.x = element_blank()
   )
 
 ggsave(

@@ -36,10 +36,11 @@ measures_plots <- measures %>%
                   function(group_by, data, measure_label, by_label){
                     data %>% mutate(value_10000 = value*10000) %>%
                     ggplot()+
-                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue')+
+                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue', size=0.5)+
+                      scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
-                        x="Date", y=NULL, 
-                        title=glue::glue("{measure_label} measurement per 10,000 patients"),
+                        x=NULL, y=NULL, 
+                        title=glue::glue("{measure_label} measurement volume per 10,000 patients"),
                         subtitle = by_label
                       )+
                       theme_bw()+
@@ -57,11 +58,12 @@ measures_plots <- measures %>%
                       ggplot()+
                       geom_line(aes(x=date, y=value_10000, group=value_q, linetype=value_q==0.5, size=value_q==0.5), colour='blue')+
                       scale_linetype_manual(breaks=c(TRUE, FALSE), values=c("solid", "dotted"), guide=FALSE)+
-                      scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.7), guide=FALSE)+
+                      scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.5), guide=FALSE)+
+                      scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
-                        x="Date", y=NULL, 
-                        title=glue::glue("{measure_label} measurement per 10,000 patients"),
-                        subtitle = glue::glue("Quantiles {by_label}")
+                        x=NULL, y=NULL, 
+                        title=glue::glue("{measure_label} measurement volume per 10,000 patients"),
+                        subtitle = glue::glue("quantiles {by_label}")
                       )+
                       theme_bw()+
                       theme(
@@ -75,8 +77,6 @@ measures_plots <- measures %>%
     )
   )
 
-
-fs::dir_create(here::here("output", "plots"))
 
 ## plot the charts (by variable)
 measures_plots %>%

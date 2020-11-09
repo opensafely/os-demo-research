@@ -1,5 +1,6 @@
-from cohortextractor import StudyDefinition, patients, codelist, codelist_from_csv
+## LIBRARIES
 
+# cohort extractor
 from cohortextractor import (
     StudyDefinition,
     Measure,
@@ -10,7 +11,7 @@ from cohortextractor import (
     combine_codelists
 )
 
-## CODE LISTS
+## CODELISTS
 # All codelist are held within the codelist/ folder.
 from codelists import *
 
@@ -26,7 +27,7 @@ study = StudyDefinition(
         # Configure the expectations framework
     default_expectations={
         "date": {"earliest": index_date, "latest": "today"},
-        "rate": "exponential_increase",
+        "rate": "uniform",
         "incidence": 0.2,
     },
 
@@ -68,26 +69,6 @@ study = StudyDefinition(
         }
     ),
     
-    # Registered death, any COVID
-    date_covidany_death=patients.with_these_codes_on_death_certificate(
-        codes_ICD10_covid,
-        between=[index_date, end_date],
-        match_only_underlying_cause=False,
-        returning="date_of_death",
-        date_format="YYYY-MM-DD",
-        return_expectations={"date": {"earliest": index_date}},
-    ),   
-    
-    # Registered death, any COVID as underlying cause
-    date_covidunderlying_death=patients.with_these_codes_on_death_certificate(
-        codes_ICD10_covid,
-        between=[index_date, end_date],
-        match_only_underlying_cause=True,
-        returning="date_of_death",
-        date_format="YYYY-MM-DD",
-        return_expectations={"date": {"earliest": index_date}},
-    ),
-    
     #Registered death, all deaths any cause
     date_death=patients.died_from_any_cause(
         between=[index_date, end_date],
@@ -95,7 +76,6 @@ study = StudyDefinition(
         date_format="YYYY-MM-DD",
         return_expectations={"date": {"earliest": index_date}},
     ),
-
 
     death_category = patients.categorised_as(
         {
@@ -109,12 +89,6 @@ study = StudyDefinition(
             codes_ICD10_covid,
             returning="binary_flag",
             match_only_underlying_cause=False,
-            between=[index_date, end_date],            
-        ),
-        died_covidunderlying=patients.with_these_codes_on_death_certificate(
-            codes_ICD10_covid,
-            returning="binary_flag",
-            match_only_underlying_cause=True,
             between=[index_date, end_date],            
         ),
 
