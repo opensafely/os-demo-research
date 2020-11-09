@@ -33,7 +33,7 @@ actions:
 
   plot_deaths:
     run: r:latest analysis/2-plot-deaths.R
-    needs: [study_definition_2_deaths]
+    needs: [generate_cohort_deaths]
     outputs:
       moderately_sensitive:
         log: output/logs/log-2-plot-deaths.txt
@@ -50,8 +50,8 @@ actions:
         cohort: output/measures/input_3_activity_*.csv
 
   generate_measures_activity:
-    run: cohortextractor:latest generate_measures --study-definition study_definition_activity --output-dir=output/measures
-    needs: [study_definition_3_activity]
+    run: cohortextractor:latest generate_measures --study-definition study_definition_3_activity --output-dir=output/measures
+    needs: [generate_cohort_activity]
     outputs:
       moderately_sensitive:
         measure_csv: output/measures/measure_*.csv 
