@@ -47,7 +47,6 @@ ggplot() +
     legend.position=c(0.1, 0.5)
   )
 
-
 ggsave(
   plot= plot_stppop, 
   filename="plot_stppop.png", path=here::here("output", "plots"), 

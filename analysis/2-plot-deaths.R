@@ -1,14 +1,14 @@
 
+## open log connection to file
+sink(here::here("output", "logs", "log-2-plot-deaths.txt"))
+
 
 ## import libraries
 library('tidyverse')
 
-## open log connection to file
-sink(here::here("output", "logs", "log-1-plot-deaths.txt"))
-
 ## import measures data
 data_input <- read_csv(
-  here::here("output", "cohorts", "input_deaths.csv"), 
+  here::here("output", "cohorts", "input_2_deaths.csv"), 
   col_types = cols(
     patient_id = col_integer(),
     registered = col_double(), # should be int but it doesn't like it
@@ -60,8 +60,7 @@ ggplot() +
   theme(
     axis.line.x = element_line(colour = "black"),
     panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank(),
-    legend.position = c(0.1, 0.9),
+    panel.grid.minor.x = element_blank()
   )
 
 

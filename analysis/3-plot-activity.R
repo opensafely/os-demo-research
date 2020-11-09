@@ -1,5 +1,5 @@
 ## open log connection to file
-sink(here::here("output", "logs","log-1-plot-measures.txt"))
+sink(here::here("output", "logs","log-3-plot-measures.txt"))
 
 ## import libraries
 library('tidyverse')
