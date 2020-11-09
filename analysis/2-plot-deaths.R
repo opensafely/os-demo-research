@@ -64,8 +64,8 @@ ggsave(
   plot= plot_deaths, 
   filename="plot_deaths.png", path=here::here("output", "plots"), 
   units = "cm",
-  height = 8,
-  width = 12
+  height = 10,
+  width = 15
 )
 
 
@@ -104,8 +104,8 @@ ggsave(
   plot= plot_cmlcoviddeaths_age, 
   filename="plot_cmlcoviddeaths_age.png", path=here::here("output", "plots"), 
   units = "cm",
-  height = 8,
-  width = 12
+  height = 10,
+  width = 15
 )
 
 ## close log connection

@@ -40,13 +40,14 @@ measures_plots <- measures %>%
                       scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
                         x=NULL, y=NULL, 
-                        title=glue::glue("{measure_label} measurement volume per 10,000 patients"),
-                        subtitle = by_label
+                        title=glue::glue("{measure_label} measurement"),
+                        subtitle =  glue::glue("{by_label}, per 10,000 patients")
                       )+
                       theme_bw()+
                       theme(
                         panel.border = element_blank(), 
                         axis.line.x = element_line(colour = "black"),
+                        axis.text.x = element_text(angle = 70, vjust = 1, hjust=1),
                         panel.grid.major.x = element_blank(),
                         panel.grid.minor.x = element_blank(),
                       )
@@ -69,6 +70,7 @@ measures_plots <- measures %>%
                       theme(
                         panel.border = element_blank(), 
                         axis.line.x = element_line(colour = "black"),
+                        axis.text.x = element_text(angle = 70, vjust = 1, hjust=1),
                         panel.grid.major.x = element_blank(),
                         panel.grid.minor.x = element_blank(),
                         #axis.line.y = element_blank(),
@@ -83,8 +85,8 @@ measures_plots %>%
   transmute(
     plot = plot_by,
     units = "cm",
-    height = 8,
-    width=12, 
+    height = 10,
+    width=15, 
     limitsize=FALSE,
     filename = str_c("plot_each_", id, ".png"),
     path = here::here("output", "plots"),
@@ -97,8 +99,8 @@ measures_plots %>%
   transmute(
     plot = plot_quantiles,
     units = "cm",
-    height = 8,
-    width=12, 
+    height = 10,
+    width=15, 
     limitsize=FALSE,
     filename = str_c("plot_quantiles_", id, ".png"),
     path = here::here("output", "plots"),

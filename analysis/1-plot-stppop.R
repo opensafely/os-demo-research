@@ -40,7 +40,7 @@ ggplot() +
   geom_sf(aes(fill=registered), colour='black') +
   scale_fill_gradient(limits = c(0,NA), low="white", high="blue")+
   labs(
-    title="Number of registered TPP-patients per STP",
+    title="Registered TPP-patients per STP",
     subtitle= "as at 1 January 2020",
     fill = NULL)+
   theme_void()+
