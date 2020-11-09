@@ -70,7 +70,7 @@ ggsave(
 
 
 deaths_tte <- survival::survfit(
-    survival::Surv(time=time_to_death, event=event) ~ age_group, 
+    survival::Surv(time=time_to_coviddeath, event=event) ~ age_group, 
     data = df_cleaned %>% filter()
   ) %>% 
   broom::tidy() %>%

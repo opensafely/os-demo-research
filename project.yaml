@@ -56,7 +56,7 @@ actions:
       moderately_sensitive:
         measure_csv: output/measures/measure_*.csv 
 
-  plot_measures:
+  plot_activity:
     run: r:latest analysis/3-plot-activity.R
     needs: [generate_measures_activity]
     outputs:
@@ -66,7 +66,7 @@ actions:
        
 
   run_all:
-    needs: [plot_stppop, plot_deaths, plot_measures]
+    needs: [plot_stppop, plot_deaths, plot_activity]
     # In order to be valid this action needs to define a run commmand and
     # some output. We don't really care what these are but the below seems to
     # do the trick.
