@@ -6,50 +6,68 @@ expectations:
 actions:
 
 
+# actions to plot TPP-STP size
+
+  generate_cohort_stppop:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_1_stppop --output-dir=output/cohorts
+    outputs:
+      highly_sensitive:
+        cohort: output/cohorts/input_1_stppop.csv
+
+  plot_stppop:
+    run: r:latest analysis/1-plot-stppop.R
+    needs: [generate_cohort_stppop]
+    outputs:
+      moderately_sensitive:
+        log: output/logs/log-1-plot-stppop.txt
+        figure: output/plots/plot_stppop.png
+
+
+
 # actions to plot deaths over time
 
   generate_cohort_deaths:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_deaths --output-dir=output/cohorts
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_2_deaths --output-dir=output/cohorts
     outputs:
       highly_sensitive:
-        cohort: output/cohorts/input_deaths.csv
-
+        cohort: output/cohorts/input_2_deaths.csv
 
   plot_deaths:
-    run: r:latest analysis/1-plot-deaths.R
-    needs: [generate_cohort_deaths]
+    run: r:latest analysis/2-plot-deaths.R
+    needs: [study_definition_2_deaths]
     outputs:
       moderately_sensitive:
-        log: output/logs/log-1-plot-deaths.txt
+        log: output/logs/log-2-plot-deaths.txt
         figure1: output/plots/plot_deaths.png
         figure2: output/plots/plot_cmldeaths_age.png
+
 
 # actions to plot gp activity over time
 
   generate_cohort_activity:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_3_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
     outputs:
       highly_sensitive:
-        cohort: output/measures/input_activity_*.csv
+        cohort: output/measures/input_3_activity_*.csv
 
   generate_measures_activity:
     run: cohortextractor:latest generate_measures --study-definition study_definition_activity --output-dir=output/measures
-    needs: [generate_cohort_activity]
+    needs: [study_definition_3_activity]
     outputs:
       moderately_sensitive:
         measure_csv: output/measures/measure_*.csv 
 
   plot_measures:
-    run: r:latest analysis/1-plot-measures.R
+    run: r:latest analysis/3-plot-measures.R
     needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
-        log: output/logs/log-1-plot-measures.txt
+        log: output/logs/log-3-plot-measures.txt
         figure: output/plots/plot_*.png
        
 
   run_all:
-    needs: [plot_measures, plot_deaths]
+    needs: [plot_stppop, plot_deaths, plot_measures]
     # In order to be valid this action needs to define a run commmand and
     # some output. We don't really care what these are but the below seems to
     # do the trick.
