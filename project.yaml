@@ -61,7 +61,7 @@ actions:
     needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
-        log: output/logs/log-3-plot-measures.txt
+        log: output/logs/log-3-plot-activity.txt
         figure: output/plots/plot_*.png
        
 
