@@ -57,7 +57,7 @@ actions:
         measure_csv: output/measures/measure_*.csv 
 
   plot_measures:
-    run: r:latest analysis/3-plot-measures.R
+    run: r:latest analysis/3-plot-activity.R
     needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
