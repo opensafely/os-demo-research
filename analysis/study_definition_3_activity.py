@@ -1,5 +1,6 @@
-from cohortextractor import StudyDefinition, patients, codelist, codelist_from_csv
+## LIBRARIES
 
+# cohort extractor
 from cohortextractor import (
     StudyDefinition,
     Measure,
@@ -10,7 +11,7 @@ from cohortextractor import (
     combine_codelists
 )
 
-## CODE LISTS
+## CODELISTS
 # All codelist are held within the codelist/ folder.
 from codelists import *
 
