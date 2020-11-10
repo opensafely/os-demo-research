@@ -7,7 +7,7 @@ library('tidyverse')
 library('sf')
 
 
-## import measures data
+## import data
 df_input <- read_csv(
   here::here("output", "cohorts", "input_1_stppop.csv"), 
   col_types = cols(
@@ -16,25 +16,23 @@ df_input <- read_csv(
   )
 )
 
-df_stppop = df_input %>%
-  group_by(stp) %>%
-  summarise(
-    registered = n()
-  )
-
 # from https://openprescribing.net/api/1.0/org_location/?format=json&org_type=stp
 # not importing directly from URL because no access on the server
 sf_stp <- st_read(here::here("lib", "STPshapefile.json"))
 
+
+df_stppop = df_input %>% count(stp, name='registered')
+
 sf_stppop <- sf_stp %>% 
-  left_join(df_stppop, by = c("ons_code" = "stp"))
+  left_join(df_stppop, by = c("ons_code" = "stp")) %>%
+  mutate(registered = if_else(!is.na(registered), registered, NA_integer_))
 
 plot_stppop <- sf_stppop %>%
 ggplot() +
   geom_sf(aes(fill=registered), colour='black') +
   scale_fill_gradient(limits = c(0,NA), low="white", high="blue")+
   labs(
-    title="Registered TPP-patients per STP",
+    title="TPP-registered patients per STP",
     subtitle= "as at 1 January 2020",
     fill = NULL)+
   theme_void()+

@@ -83,24 +83,12 @@ index_date = "2020-01-01"
 study = StudyDefinition(
 
     # This line defines the study population
-    population = patients.all(),
-
-    registered = patients.registered_as_of(
-        index_date,
-        return_expectations={"incidence": 1}
-    ),
-
-    died = patients.died_from_any_cause(
-		  on_or_before=index_date,
-		  returning="binary_flag",
-      return_expectations={"incidence": 0.01}
-    ),
+    population = patients.registered_as_of(index_date),
 
     stp = patients.registered_practice_as_of(
         index_date,
         returning="stp_code",
         return_expectations={
-            "rate": "universal",
             "category": {"ratios": dict_stp},
         },
     ),
@@ -128,38 +116,25 @@ index_date = "2020-01-01"
 This defines the date that we're interested in.
 
 ```
-population = patients.all(),
+population = patients.registered_as_of(index_date)
 ```
-This declares that we want to extract information for _all_ patients within the OpenSAFELY database.
-
-```
-registered = patients.registered_as_of(
-        index_date,
-        return_expectations={"incidence": 0.95}
-),
-```
-This is a flag that says whether or not each patient was registered at a practice on the 1 January 2020 (OpenSAFELY has info on both current and past registrations). The `return_expectations` says that we expect 95\% of patients within the database to be registered.
-
-```
-died = patients.died_from_any_cause(
-  on_or_before=index_date,
-  returning="binary_flag",
-  return_expectations={"incidence": 0.01}
-),
-```
-This is a flag that says whether or not a patient has died on or before 1 January 2020. As post-death deregistrations are sometimes late, we want to exclude patients who may be registered but who have actually died. This information is taken from death registration data provided to OpenSAFELY by the Office for National Statistics. Again, the `return_expectations` argument says that we expect 1\% of patients to have died on or before 1 January 2020. The `returning` argument says what information we want to be returned from the database. If we had set this to `returning="date"` it would have given the actual date that the patient died.
+This says that we want to extract information only for patients who were registered at a practice on the 1 January 2020. There will be one row for each of these patients in the extracted dataset. `population` is a reserved variable name within `StudyDefinition` for specifying the study population. 
 
 ```
 stp = patients.registered_practice_as_of(
-        index_date,
-        returning="stp_code",
-        return_expectations={
-            "rate": "universal",
-            "category": {"ratios": dict_stp},
-        },
-    ),
+  index_date,
+  returning="stp_code",
+  return_expectations={
+    "incidence": 1,
+    "category": {"ratios": dict_stp},
+  },
+)
 ```
-Finally, we extract the STP for each patient (or more strictly, the STP of each patients' practice). For the `returning_expectations`, the `"rate": "universal"` says that we expect an STP code for every single patient, and the `"category": {"ratios": dict_stp}` uses the pre-defined STP dictionary `dict_stp` (imported earlier) to define the expected distribution of STPs. This is currently set to a uniform distribution, so that each STP is equally likely to appear in the dataset.
+
+This says we want to extract the STP for each patient (or more strictly, the STP of each patients' practice). For the `returning_expectations` option, the `"incidence": 1"` says that we expect an STP code for every single patient, and the `"category": {"ratios": dict_stp}` uses the pre-defined STP dictionary `dict_stp` (imported earlier) to define the expected distribution of STPs. This is currently set to a uniform distribution, so that each STP is equally likely to appear in the dataset.
+
+
+This study definition used two in-built variable extractor functions in OpenSAFELY's `patients` library, `patients.registered_as_of()` and `patients._practice_as_of()`. There are many more such functions, like `patients.age()`, `patients.with_these_clinical_events()`, and `patients.admitted_to_icu()`, which are all documented 
 
 
 #### Dummy data
@@ -172,9 +147,52 @@ cohortextractor generate_cohort --study-definition study_defintion_stppop.py --e
 
 This will create a file `input_stppop.csv` in the `/output/cohorts/` folder with `10000` rows. 
 
-#### 
+#### Script development
 
-Now that we have a dataset, we can begin to develop and test our analysis code in R
+Now that we have a dummy dataset, we can begin to develop and test our analysis code in R. We just want to import the dataset, count the number of STPs, and output to a file. These steps are outlined code-block below.
+
+```{r plot.stppop}
+## import libraries
+library('tidyverse')
+library('sf')
+
+## import data
+df_input <- read_csv(
+  here::here("output", "cohorts", "input_1_stppop.csv"), 
+  col_types = cols(
+    patient_id = col_integer(),
+    stp = col_character()
+  )
+)
+
+# from https://openprescribing.net/api/1.0/org_location/?format=json&org_type=stp
+# not importing directly from URL because no access on the server
+sf_stp <- st_read(here::here("lib", "STPshapefile.json"))
+
+df_stppop = df_input %>% count(stp, name='registered')
+
+sf_stppop <- sf_stp %>% 
+  left_join(df_stppop, by = c("ons_code" = "stp")) %>%
+  mutate(registered = if_else(!is.na(registered), registered, NA_integer_))
+
+plot_stppop <- sf_stppop %>%
+ggplot() +
+  geom_sf(aes(fill=registered), colour='black') +
+  scale_fill_gradient(limits = c(0,NA), low="white", high="blue")+
+  labs(
+    title="TPP-registered patients per STP",
+    subtitle= "as at 1 January 2020",
+    fill = NULL)+
+  theme_void()+
+  theme(
+    legend.position=c(0.1, 0.5)
+  )
+
+plot_stppop
+```
+
+This is just dummy data but we'll be able to simply repeat the steps above on the real dataset to see how this map looks for real.
+
 
 
 
