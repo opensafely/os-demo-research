@@ -12,16 +12,11 @@ df_input <- read_csv(
   here::here("output", "cohorts", "input_1_stppop.csv"), 
   col_types = cols(
     patient_id = col_integer(),
-    registered = col_double(), # should be int but it doesn't like it
-    died = col_double(), # should be int but it doesn't like it
-    stp = col_character(),
-    age = col_double(),
-    sex = col_character()
+    stp = col_character()
   )
 )
 
 df_stppop = df_input %>%
-  filter(is.na(died)) %>%
   group_by(stp) %>%
   summarise(
     registered = n()
@@ -30,7 +25,6 @@ df_stppop = df_input %>%
 # from https://openprescribing.net/api/1.0/org_location/?format=json&org_type=stp
 # not importing directly from URL because no access on the server
 sf_stp <- st_read(here::here("lib", "STPshapefile.json"))
-
 
 sf_stppop <- sf_stp %>% 
   left_join(df_stppop, by = c("ons_code" = "stp"))
