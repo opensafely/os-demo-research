@@ -79,17 +79,16 @@ study = StudyDefinition(
 
     death_category = patients.categorised_as(
         {
-            "alive": "NOT died_any",
             "covid-death": "died_covid",
-            "non-covid-death": "died_noncovid",
-            "unknown" : "DEFAULT"
+            "non-covid-death": "(NOT died_covid) AND died_any",
+            "" : "DEFAULT"
         },
 
         died_covid=patients.with_these_codes_on_death_certificate(
             codes_ICD10_covid,
             returning="binary_flag",
             match_only_underlying_cause=False,
-            between=[index_date, end_date],            
+            between=[index_date, end_date],
         ),
 
         died_any = patients.died_from_any_cause(
@@ -98,12 +97,7 @@ study = StudyDefinition(
             return_expectations={"incidence": 0.01}
         ),
 
-        died_noncovid = patients.satisfying(
-            """(NOT died_covid) AND died_any""",
-            return_expectations={"incidence": 0.15},
-        ),
-
-        return_expectations={"category": {"ratios": {"alive": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, "incidence": 1},
+        return_expectations={"category": {"ratios": {"": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, "incidence": 1},
     ),
 
     
