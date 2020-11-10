@@ -25,7 +25,7 @@ df_stppop = df_input %>% count(stp, name='registered')
 
 sf_stppop <- sf_stp %>% 
   left_join(df_stppop, by = c("ons_code" = "stp")) %>%
-  mutate(registered = if_else(!is.na(registered), registered, NA_integer_))
+  mutate(registered = if_else(!is.na(registered), registered, 0))
 
 plot_stppop <- sf_stppop %>%
 ggplot() +
