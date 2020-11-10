@@ -27,7 +27,7 @@ sf_stppop <- sf_stp %>%
   left_join(df_stppop, by = c("ons_code" = "stp")) %>%
   mutate(registered = if_else(!is.na(registered), registered, 0L))
 
-plot_stppop <- sf_stppop %>%
+plot_stppop_map <- sf_stppop %>%
 ggplot() +
   geom_sf(aes(fill=registered), colour='black') +
   scale_fill_gradient(limits = c(0,NA), low="white", high="blue")+
