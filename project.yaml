@@ -19,7 +19,8 @@ actions:
     outputs:
       moderately_sensitive:
         log: output/logs/log-1-plot-stppop.txt
-        figure: output/plots/plot_stppop.png
+        figure1: output/plots/plot_stppop_map.png
+        figure2: output/plots/plot_stppop_bar.png
 
 
 

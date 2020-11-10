@@ -149,9 +149,9 @@ This will create a file `input_stppop.csv` in the `/output/cohorts/` folder with
 
 #### Script development
 
-Now that we have a dummy dataset, we can begin to develop and test our analysis code in R. We just want to import the dataset, count the number of STPs, and output to a file. These steps are outlined code-block below.
+Now that we have a dummy dataset, we can begin to develop and test our analysis code in R. We just want to import the dataset, count the number of STPs, and output to a file. First we import and process the data:
 
-```{r plot.stppop}
+```{r stppop}
 ## import libraries
 library('tidyverse')
 library('sf')
@@ -174,8 +174,12 @@ df_stppop = df_input %>% count(stp, name='registered')
 sf_stppop <- sf_stp %>% 
   left_join(df_stppop, by = c("ons_code" = "stp")) %>%
   mutate(registered = if_else(!is.na(registered), registered, 0L))
+```
 
-plot_stppop <- sf_stppop %>%
+
+Then we create a map:
+```{r stppop.map}
+plot_stppop_map <- sf_stppop %>%
 ggplot() +
   geom_sf(aes(fill=registered), colour='black') +
   scale_fill_gradient(limits = c(0,NA), low="white", high="blue")+
@@ -188,11 +192,36 @@ ggplot() +
     legend.position=c(0.1, 0.5)
   )
 
-plot_stppop
+plot_stppop_map
 ```
 
-This is just dummy data but we'll be able to simply repeat the steps above on the real dataset to see how this map looks for real.
+Or a bar chart if you prefer:
+```{r stppop.bar}
 
+plot_stppop_bar <- sf_stppop %>%
+  mutate(
+    name = forcats::fct_reorder(name, registered, median, .desc=FALSE)
+  ) %>%
+ggplot() +
+  geom_col(aes(x=registered, y=name, fill=registered), colour='black') +
+  scale_fill_gradient(limits = c(0,NA), low="white", high="blue", guide=FALSE)+
+  labs(
+    title="TPP-registered patients per STP",
+    subtitle= "as at 1 January 2020",
+    y=NULL,
+    x="Registered patients",
+    fill = NULL)+
+  theme_minimal()+
+  theme(
+    plot.title.position = "plot",
+    plot.caption.position =  "plot"
+  )
+
+plot_stppop_bar
+```
+
+
+This is just dummy data but we'll be able to easily rerun the code above on the real dataset to see how this map looks for real.
 
 
 

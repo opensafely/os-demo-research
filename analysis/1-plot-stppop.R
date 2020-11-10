@@ -41,12 +41,46 @@ ggplot() +
   )
 
 ggsave(
-  plot= plot_stppop, 
-  filename="plot_stppop.png", path=here::here("output", "plots"), 
+  plot= plot_stppop_map, 
+  filename="plot_stppop_map.png", path=here::here("output", "plots"), 
   units = "cm",
   height = 10,
   width = 10
 )
+
+
+
+plot_stppop_bar <- sf_stppop %>%
+  mutate(
+    name = forcats::fct_reorder(name, registered, median, .desc=FALSE)
+  ) %>%
+  ggplot() +
+  geom_col(aes(x=registered, y=name, fill=registered), colour='black') +
+  scale_fill_gradient(limits = c(0,NA), low="white", high="blue", guide=FALSE)+
+  labs(
+    title="TPP-registered patients per STP",
+    subtitle= "as at 1 January 2020",
+    y=NULL,
+    x="Registered patients",
+    fill = NULL)+
+  theme_minimal()+
+  theme(
+    plot.title.position = "plot",
+    plot.caption.position =  "plot"
+  )
+
+
+ggsave(
+  plot= plot_stppop_bar, 
+  filename="plot_stppop_bar.png", path=here::here("output", "plots"), 
+  units = "cm",
+  height = 10,
+  width = 15
+)
+
+
+plot_stppop_bar
+
 
 ## close log connection
 sink()

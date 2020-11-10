@@ -31,7 +31,7 @@ study = StudyDefinition(
         index_date,
         returning="stp_code",
         return_expectations={
-            "incidence": 0.95,
+            "incidence": 0.99,
             "category": {"ratios": dict_stp},
         },
     ),
