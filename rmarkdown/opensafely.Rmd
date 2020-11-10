@@ -165,8 +165,9 @@ df_input <- read_csv(
   )
 )
 
+# import the STP shapefile for the map
 # from https://openprescribing.net/api/1.0/org_location/?format=json&org_type=stp
-# not importing directly from URL because no access on the server
+# not importing directly from the URL because no access on the server, so have copied into the repo
 sf_stp <- st_read(here::here("lib", "STPshapefile.json"))
 
 df_stppop = df_input %>% count(stp, name='registered')
@@ -202,17 +203,19 @@ plot_stppop_bar <- sf_stppop %>%
   mutate(
     name = forcats::fct_reorder(name, registered, median, .desc=FALSE)
   ) %>%
-ggplot() +
-  geom_col(aes(x=registered, y=name, fill=registered), colour='black') +
+  ggplot() +
+  geom_col(aes(x=registered/1000000, y=name, fill=registered), colour='black') +
   scale_fill_gradient(limits = c(0,NA), low="white", high="blue", guide=FALSE)+
   labs(
     title="TPP-registered patients per STP",
     subtitle= "as at 1 January 2020",
     y=NULL,
-    x="Registered patients",
+    x="Registered patients\n(million)",
     fill = NULL)+
   theme_minimal()+
   theme(
+    panel.grid.major.y = element_blank(),
+    panel.grid.minor.y = element_blank(),
     plot.title.position = "plot",
     plot.caption.position =  "plot"
   )
