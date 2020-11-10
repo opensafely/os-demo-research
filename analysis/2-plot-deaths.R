@@ -11,8 +11,6 @@ df_input <- read_csv(
   here::here("output", "cohorts", "input_2_deaths.csv"), 
   col_types = cols(
     patient_id = col_integer(),
-    registered = col_double(), # should be int but it doesn't like it
-    died = col_double(), # should be int but it doesn't like it
     age = col_double(),
     sex = col_character(),
     date_death = col_date(format="%Y-%m-%d"),

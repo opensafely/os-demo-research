@@ -40,18 +40,18 @@ study = StudyDefinition(
         (age >= 18 AND age < 120) AND
         (NOT died) AND
         (registered)
-        """
-    ),
+        """,
+        
+        registered = patients.registered_as_of(
+            index_date,
+            #return_expectations={"incidence": 1}
+        ),
 
-    registered = patients.registered_as_of(
-        index_date,
-        return_expectations={"incidence": 1}
-    ),
-
-    died = patients.died_from_any_cause(
-		on_or_before=index_date,
-		returning="binary_flag",
-        return_expectations={"incidence": 0.01}
+        died = patients.died_from_any_cause(
+		    on_or_before=index_date,
+		    returning="binary_flag",
+            #return_expectations={"incidence": 0.01}
+        ),
     ),
 
     age=patients.age_as_of(

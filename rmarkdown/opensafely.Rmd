@@ -1,0 +1,268 @@
+---
+title: "OpenSAFELY demonstration"
+author: "Will Hulme"
+date: "14/10/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+```
+
+
+# OpenSAFELY
+
+OpenSAFELY is a new secure analytics platform for electronic health records in the NHS, created to deliver urgent research during the global COVID-19 emergency. It is now successfully delivering analyses across more than 24 million patients’ full pseudonymised primary care NHS records, with more to follow shortly.
+
+All our analytic software is open for security review, scientific review, and re-use. OpenSAFELY uses a new model for enhanced security and timely access to data: we don’t transport large volumes of potentially disclosive pseudonymised patient data outside of the secure environments managed by the electronic health record software company; instead, trusted analysts can run large scale computation across near real-time pseudonymised patient records inside the data centre of the electronic health records software company. 
+
+This document is intended as a short showcase of the OpenSAFELY platform. It begins by 
+
+## Key concepts
+
+* A *study definition* specifies the patients you want to include in your study and defines the variables that describe them. Study definitions are defined as a Python script, that relies heavily on a easily-readable functions API.
+* The *cohort extractor* uses the study definition to create a dataset for analysis. This is either:
+   * A dummy dataset used for developing and testing analysis code on the user's own machine. Users have control over the characteristics of each dummy variable, which are defined inside the study definition. 
+   * A real dataset created from the OpenSAFELY database, used for the analysis proper. Real datasets never leave the secure server, only summary data and other outputs that are derived from them can be released (after disclosivity checks) .
+* A *Codelist* is a collection of clinical codes that define a particular condition, event or diagnosis.
+* The *project pipeline* defines dependencies within the project's analytic code. For example `make_chart.R` may depend on `process_data.R`, which depends on the study dataset having been extracted. This reduces redundancies by only running scripts that need to be run.
+* The *job runner* runs actions defined in the project pipeline. It can run all or 
+
+* 
+
+
+## Technical set-up
+
+OpenSAFELY maintains extremely high standards for data privacy, whilst ensuring complete computational and analytical transparency. As such there are some technical pre-requisites that users must satisfy to use the platform. These include using git and GitHub, editing pythoThese are can be read on the documentations 
+
+## Workflow
+
+The high-level workflow for OpenSAFELY is as follows:
+
+1 Create a git repository from the template provided
+2 Update the `study_definition.py` script. This defines the:
+  * patient population (dataset rows)
+  * variables (dataset columns), and their expected distributions for use in dummy data
+3 Specify the codelists used in the study definition in `codelists.txt` (and create new codelists if necessary)
+5 Import the codelists and create a dummy dataset via the `cohortextractor`
+6 Write and test analysis scripts using the dummy dataset
+7 Update the project pipeline
+8 Run the analysis scripts on the real data via the job runner
+9 Check the outputs for disclosivity and release where appropriate
+
+Steps 2-7 are iterative and should be accompanied by frequent, well-structured git commits, with code reviews where appropriate. These steps are also automatically tested against dummy data every time a new version of the repository is saved ("pushed") to GitHub. 
+
+
+Let's start with a simple example.
+
+
+## Example 1
+
+We're going to use OpenSAFELY to find out how many patients are registered at a TPP practice within each STP on 1 January 2020. 
+
+
+#### Study definition
+We start by defining the study definition. The entire script, called `study_definition_stppop.py` looks like this:
+
+```{py}
+
+## LIBRARIES
+
+# cohort extractor
+from cohortextractor import (StudyDefinition, patients)
+
+# dictionary of STP codes (for dummy data)
+from dictionaries import dict_stp
+
+
+index_date = "2020-01-01"
+
+## STUDY POPULATION
+
+study = StudyDefinition(
+
+    # This line defines the study population
+    population = patients.all(),
+
+    registered = patients.registered_as_of(
+        index_date,
+        return_expectations={"incidence": 1}
+    ),
+
+    died = patients.died_from_any_cause(
+		  on_or_before=index_date,
+		  returning="binary_flag",
+      return_expectations={"incidence": 0.01}
+    ),
+
+    stp = patients.registered_practice_as_of(
+        index_date,
+        returning="stp_code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": dict_stp},
+        },
+    ),
+)
+
+
+```
+
+Let's break it down:
+
+```
+from cohortextractor import (StudyDefinition, patients)
+```
+
+This imports the necessary functions from the cohortextractor library, that you will have previously installed.
+
+```
+from dictionaries import dict_stp
+```
+This imports a dictionary of STP codes for creating the dummy data
+
+```
+index_date = "2020-01-01"
+```
+This defines the date that we're interested in.
+
+```
+population = patients.all(),
+```
+This declares that we want to extract information for _all_ patients within the OpenSAFELY database.
+
+```
+registered = patients.registered_as_of(
+        index_date,
+        return_expectations={"incidence": 0.95}
+),
+```
+This is a flag that says whether or not each patient was registered at a practice on the 1 January 2020 (OpenSAFELY has info on both current and past registrations). The `return_expectations` says that we expect 95\% of patients within the database to be registered.
+
+```
+died = patients.died_from_any_cause(
+  on_or_before=index_date,
+  returning="binary_flag",
+  return_expectations={"incidence": 0.01}
+),
+```
+This is a flag that says whether or not a patient has died on or before 1 January 2020. As post-death deregistrations are sometimes late, we want to exclude patients who may be registered but who have actually died. This information is taken from death registration data provided to OpenSAFELY by the Office for National Statistics. Again, the `return_expectations` argument says that we expect 1\% of patients to have died on or before 1 January 2020. The `returning` argument says what information we want to be returned from the database. If we had set this to `returning="date"` it would have given the actual date that the patient died.
+
+```
+stp = patients.registered_practice_as_of(
+        index_date,
+        returning="stp_code",
+        return_expectations={
+            "rate": "universal",
+            "category": {"ratios": dict_stp},
+        },
+    ),
+```
+Finally, we extract the STP for each patient (or more strictly, the STP of each patients' practice). For the `returning_expectations`, the `"rate": "universal"` says that we expect an STP code for every single patient, and the `"category": {"ratios": dict_stp}` uses the pre-defined STP dictionary `dict_stp` (imported earlier) to define the expected distribution of STPs. This is currently set to a uniform distribution, so that each STP is equally likely to appear in the dataset.
+
+
+#### Dummy data
+
+Now that we've defined the study cohort, we can generate a dummy dataset. Assuming you have the correct technical set-up, this is simply a case of submitting the following command in a terminal that can find `cohortextractor` (you can use `cohortextractor --help` to find out more about this command, the available options, defaults, etc.):
+
+```
+cohortextractor generate_cohort --study-definition study_defintion_stppop.py --expectations-population 10000 --output-dir=output/cohorts
+```
+
+This will create a file `input_stppop.csv` in the `/output/cohorts/` folder with `10000` rows. 
+
+#### 
+
+Now that we have a dataset, we can begin to develop and test our analysis code in R
+
+
+
+
+## Import R libraries
+
+```{r, import}
+library('tidyverse')
+```
+
+
+```{r import.cohort}
+## import cohort data
+data_input <- read_csv(here::here("output", "cohorts", "input_deaths.csv"), col_types = "iDDDdddcc")
+
+data_cleaned <- data_input %>%
+  mutate(
+    sex = case_when(
+      sex=="F" ~ "Female",
+      sex=="M" ~ "Male",
+      TRUE ~ sex
+    ),
+  )
+
+death_day <- data_cleaned %>%
+  filter(!is.na(date_death)) %>%
+  group_by(date_death, death_category, sex) %>%
+  summarise(n=n(), .groups="drop")
+
+```
+
+```{r plot.deaths}
+plot_deaths <- death_day %>%
+ggplot() +
+  #geom_line(aes(x=date_death, y=n, colour=death_category))+
+  geom_bar(aes(x=date_death, y=n, fill=death_category), stat="identity")+
+  #directlabels::geom_dl(aes(x=date_death, y=n, colour=death_category, label = death_category), method = "last.qp")+
+  facet_grid(cols=vars(sex))+
+  labs(x=NULL, y=NULL, fill=NULL, title="Daily deaths")+
+  scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
+  scale_y_continuous(expand = c(0, 0))+
+  scale_fill_brewer(palette="Set2")+
+  coord_cartesian(clip = 'off') +
+  theme_bw()+
+  theme(
+    panel.border = element_blank(), 
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    strip.background = element_blank(),
+    legend.position = c(0.1, 0.9),
+    legend.background = element_blank()
+    #plot.margin = margin(0, 0, 0, 0, "pt"),
+  )
+plot_deaths
+```
+
+```{r plot.tte}
+plot_deaths <- death_day %>% ungroup() %>%
+ggplot() +
+  #geom_line(aes(x=date_death, y=n, colour=death_category))+
+  geom_bar(aes(x=date_death, y=n, fill=death_category), stat="identity")+
+  #directlabels::geom_dl(aes(x=date_death, y=n, colour=death_category, label = death_category), method = "last.qp")+
+  facet_grid(cols=vars(sex))+
+  labs(x=NULL, y=NULL, fill=NULL, title="Daily deaths")+
+  scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
+  scale_y_continuous(expand = c(0, 0))+
+  scale_fill_brewer(palette="Set2")+
+  coord_cartesian(clip = 'off') +
+  theme_bw()+
+  theme(
+    panel.border = element_blank(), 
+    axis.line.x = element_line(colour = "black"),
+    panel.grid.major.x = element_blank(),
+    panel.grid.minor.x = element_blank(),
+    strip.background = element_blank(),
+    legend.position = c(0.1, 0.9),
+    legend.background = element_blank()
+    #plot.margin = margin(0, 0, 0, 0, "pt"),
+  )
+
+```
+
+
+
+
+## Future development
+
+* Better dummy data, respecting between-variable dependencies and pre-loaded dictionaries
+*
+* 
