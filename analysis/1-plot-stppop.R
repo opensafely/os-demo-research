@@ -76,7 +76,7 @@ ggsave(
   plot= plot_stppop_bar, 
   filename="plot_stppop_bar.png", path=here::here("output", "plots"), 
   units = "cm",
-  height = 10,
+  height = 15,
   width = 15
 )
 
