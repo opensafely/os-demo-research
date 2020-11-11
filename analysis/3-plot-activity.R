@@ -4,7 +4,7 @@ sink(here::here("output", "logs","log-3-plot-activity.txt"))
 ## import libraries
 library('tidyverse')
 
-# create measures look-up
+# create look-up table to iterate over
 md_tbl <- tibble(
   measure = c("cholesterol", "cholesterol", "inr", "inr"),
   measure_label = c("Cholesterol", "Cholesterol", "INR", "INR"),
@@ -36,7 +36,7 @@ measures_plots <- measures %>%
                   function(group_by, data, measure_label, by_label){
                     data %>% mutate(value_10000 = value*10000) %>%
                     ggplot()+
-                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue', size=0.2)+
+                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue', size=0.25)+
                       scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
                         x=NULL, y=NULL, 
@@ -59,7 +59,7 @@ measures_plots <- measures %>%
                       ggplot()+
                       geom_line(aes(x=date, y=value_10000, group=value_q, linetype=value_q==0.5, size=value_q==0.5), colour='blue')+
                       scale_linetype_manual(breaks=c(TRUE, FALSE), values=c("solid", "dotted"), guide=FALSE)+
-                      scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.2), guide=FALSE)+
+                      scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.4), guide=FALSE)+
                       scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
                         x=NULL, y=NULL, 
