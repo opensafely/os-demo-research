@@ -13,7 +13,11 @@ from cohortextractor import (
 
 ## CODELISTS
 # All codelist are held within the codelist/ folder.
-from codelists import *
+codes_ICD10_covid = codelist_from_csv(
+    "codelists/opensafely-covid-identification.csv", 
+    system = "icd10", 
+    column = "icd10_code"
+)
 
 ## STUDY POPULATION
 # Defines both the study population and points to the important covariates
