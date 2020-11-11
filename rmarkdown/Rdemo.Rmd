@@ -1,5 +1,5 @@
 ---
-title: "OpenSAFELY platform demonstration"
+title: "An OpenSAFELY platform demonstration using R"
 author: "Will Hulme, Researcher, The DataLab, University of Oxford"
 date: "11/11/2020"
 output:
@@ -456,12 +456,12 @@ Clearly there is a substantial dip in activity for cholesterol which corresponds
 
 We can also look at deciles of measurement activity for each GP practice for cholesterol:
 
-[![](../released-ouput/plots/plot_quantiles_cholesterol_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_stp.png)
+[![](../released-ouput/plots/plot_quantiles_cholesterol_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_practice.png)
 
 
 and for INR:
 
-[![](../released-ouput/plots/plot_quantiles_inr_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_stp.png)
+[![](../released-ouput/plots/plot_quantiles_inr_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
 
 
 
