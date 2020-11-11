@@ -71,44 +71,5 @@ ggsave(
 )
 
 
-deaths_tte <- survival::survfit(
-    survival::Surv(time=time_to_coviddeath, event=event) ~ age_group, 
-    data = df_cleaned %>% filter()
-  ) %>% 
-  broom::tidy() %>%
-  group_by(strata) %>%
-  nest() %>%
-  mutate(data = map(data, ~add_row(., time=0, estimate=1, std.error=0, conf.high=1, conf.low=1, .before=1))) %>%
-  unnest(data) %>%
-  mutate(
-    age_group = stringr::str_remove(strata, "age_group="),
-    leadtime = lead(time, n=1, default = NA)
-  )
-
-plot_cmlcoviddeaths_age <- deaths_tte %>%
-  ggplot()+
-  geom_step(aes(x=time, y=1-estimate, group=age_group, colour=age_group))+
-  geom_rect(aes(xmin=time, xmax= leadtime, ymin=1-conf.high, ymax=1-conf.low, group=age_group, fill=age_group), alpha=0.1, colour=NA)+
-  scale_fill_viridis_d(guide=FALSE)+
-  scale_colour_viridis_d()+
-  scale_y_continuous(expand = c(0,0))+
-  labs(x="Days since 1 Jan 2020", y="Death rate", colour="Age",
-       title="Cumulative covid death rate",
-       subtitle = "by age group")+
-  theme_minimal()+
-  theme(
-    axis.line.x = element_line(colour = "black"),
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor.x = element_blank()
-  )
-
-ggsave(
-  plot= plot_cmlcoviddeaths_age, 
-  filename="plot_cmlcoviddeaths_age.png", path=here::here("output", "plots"), 
-  units = "cm",
-  height = 10,
-  width = 15
-)
-
 ## close log connection
 sink()
