@@ -36,7 +36,7 @@ study = StudyDefinition(
     index_date = index_date,
 
     # This line defines the study population
-    population=patients.satisfying(
+    population = patients.satisfying(
         """
         (sex = 'F' OR sex = 'M') AND
         (age >= 18 AND age < 120) AND
@@ -44,39 +44,33 @@ study = StudyDefinition(
         (registered)
         """,
         
-        registered = patients.registered_as_of(
-            index_date,
-            #return_expectations={"incidence": 1}
-        ),
-
+        registered = patients.registered_as_of(index_date),
         died = patients.died_from_any_cause(
 		    on_or_before=index_date,
 		    returning="binary_flag",
-            #return_expectations={"incidence": 0.01}
         ),
     ),
 
-    age=patients.age_as_of(
+    age = patients.age_as_of(
         index_date,
         return_expectations={
-            "rate": "universal",
             "int": {"distribution": "population_ages"},
+            "incidence": 1
         },
     ),
 
-    sex=patients.sex(
+    sex = patients.sex(
         return_expectations={
-            "rate": "universal",
             "category": {"ratios": {"M": 0.49, "F": 0.51}},
+            "incidence": 1
         }
     ),
     
-    #Registered death, all deaths any cause
-    date_death=patients.died_from_any_cause(
-        between=[index_date, end_date],
-        returning="date_of_death",
-        date_format="YYYY-MM-DD",
-        return_expectations={
+    date_death = patients.died_from_any_cause(
+        between = [index_date, end_date],
+        returning = "date_of_death",
+        date_format = "YYYY-MM-DD",
+        return_expectations = {
             "incidence": 0.2,
         },
     ),
@@ -88,19 +82,22 @@ study = StudyDefinition(
             "" : "DEFAULT"
         },
 
-        died_covid=patients.with_these_codes_on_death_certificate(
+        died_covid = patients.with_these_codes_on_death_certificate(
             codes_ICD10_covid,
-            returning="binary_flag",
-            match_only_underlying_cause=False,
-            between=[index_date, end_date],
+            returning = "binary_flag",
+            match_only_underlying_cause = False,
+            between = [index_date, end_date],
         ),
 
         died_any = patients.died_from_any_cause(
-		    between=[index_date, end_date],
-		    returning="binary_flag",
+		    between = [index_date, end_date],
+		    returning = "binary_flag",
         ),
 
-        return_expectations={"category": {"ratios": {"": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, "incidence": 1},
+        return_expectations = {
+            "category": {"ratios": {"": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, 
+            "incidence": 1
+        },
     ),
 
     
