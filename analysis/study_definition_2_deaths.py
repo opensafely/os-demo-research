@@ -31,7 +31,6 @@ study = StudyDefinition(
     default_expectations={
         "date": {"earliest": index_date, "latest": end_date},
         "rate": "uniform",
-        "incidence": 0.2,
     },
 
     index_date = index_date,
@@ -77,7 +76,9 @@ study = StudyDefinition(
         between=[index_date, end_date],
         returning="date_of_death",
         date_format="YYYY-MM-DD",
-        return_expectations={"date": {"earliest": index_date}},
+        return_expectations={
+            "incidence": 0.2,
+        },
     ),
 
     death_category = patients.categorised_as(
@@ -97,7 +98,6 @@ study = StudyDefinition(
         died_any = patients.died_from_any_cause(
 		    between=[index_date, end_date],
 		    returning="binary_flag",
-            return_expectations={"incidence": 0.01}
         ),
 
         return_expectations={"category": {"ratios": {"": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, "incidence": 1},

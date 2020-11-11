@@ -1,36 +1,32 @@
 ## LIBRARIES
 
 # cohort extractor
-from cohortextractor import (
-    StudyDefinition,
-    patients
-)
+from cohortextractor import (StudyDefinition, patients)
 
 # dictionary of STP codes (for dummy data)
 from dictionaries import dict_stp
 
-## STUDY POPULATION
-# Defines both the study population and points to the important covariates
-
+# set the index date
 index_date = "2020-01-01"
+
+## STUDY POPULATION
 
 study = StudyDefinition(
 
     default_expectations = {
         "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
     },
-
+    
     # This line defines the study population
-    population = patients.registered_as_of(
-        index_date,
-    ),
+    population = patients.registered_as_of(index_date),
 
+    # this line defines the stp variable we want to extract
     stp = patients.registered_practice_as_of(
         index_date,
         returning="stp_code",
         return_expectations={
-            "incidence": 0.99,
             "category": {"ratios": dict_stp},
         },
     ),
 )
+

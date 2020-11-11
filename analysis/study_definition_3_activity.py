@@ -46,7 +46,6 @@ study = StudyDefinition(
     # This line defines the study population
     population = patients.satisfying(
         """
-        (sex = 'F' OR sex = 'M') AND
         (age >= 18 AND age < 120) AND
         (NOT died) AND
         (registered)
@@ -58,7 +57,6 @@ study = StudyDefinition(
 	    ),
         registered = patients.registered_as_of(index_date),
         age=patients.age_as_of(index_date),
-        sex=patients.sex(),
     ),
 
     ### geographic/administrative groups
