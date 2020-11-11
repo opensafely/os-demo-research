@@ -70,7 +70,8 @@ assumes that the technical set-up has been completed.
 For researchers using the platform, the OpenSAFELY workflow for a single
 study is typically as follows:
 
-1.  **Create a git repository** from the template provided
+1.  **Create a git repository** from the template provided and clone it
+    on your local machine
 2.  **Create a Study Definition** that specifies what data you want to
     extract from the database:
     -   Specify the patient population (dataset rows) and variables
@@ -893,11 +894,16 @@ and for INR:
 
 [<img src="../released-ouput/plots/plot_quantiles_inr_stp.png" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
 
-Future developments
--------------------
+Future developments on the OpenSAFELY roadmap
+---------------------------------------------
 
 -   Better dummy data, respecting between-variable dependencies and
-    pre-loaded dictionaries
+    providing pre-loaded dictionaries
+-   Automated comparisons between dummy data and real data
+-   Automated disclosivity checks
 -   Fast patient matching algorithms for example for case-control
     studies
--
+-   More comprehensive population coverage
+-   More external datasets
+-   Live dashborads of health service activity
+-   etc, etc
