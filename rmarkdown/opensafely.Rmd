@@ -3,8 +3,10 @@ title: "OpenSAFELY platform demonstration"
 author: "Will Hulme, Researcher, The DataLab, University of Oxford"
 date: "11/11/2020"
 output:
-  html_document:
-    code_folding: show
+#  html_document:
+#    code_folding: show
+  md_document:
+    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
@@ -42,7 +44,7 @@ It also performs other useful tasks like importing codelists and generating _Mea
 
 ### Workflow
 
-For researchers using the platform, the OpenSAFELY workflow is typically as follows:
+For researchers using the platform, the OpenSAFELY workflow for a single study is typically as follows:
 
 1. **Create a git repository** from the template provided
 2. **Create a Study Definition** that specifies what data you want to extract from the database:
@@ -60,7 +62,7 @@ For researchers using the platform, the OpenSAFELY workflow is typically as foll
 7. **Check the output for disclosivity** within the server
 8. **Release the outputs** via github
 
-Steps 2-5 can all be progressed on your local machine without accessing the real data. These steps are iterative and should be accompanied by frequent, well-structured git commits, with code reviews where appropriate. These steps are automatically tested against dummy data every time a new version of the repository is saved ("pushed") to GitHub. 
+Steps 2-5 can all be progressed on your local machine without accessing the real data. These steps are iterative and should proceed with frequent git commits and code reviews where appropriate. These steps are automatically tested against dummy data every time a new version of the repository is saved ("pushed") to GitHub. 
 
 
 Let's start with a simple example.
@@ -72,7 +74,7 @@ This example introduces study definitions, expectations and dummy data, and proj
 
 ### Create a git repository
 
-Got to the [research template reposity]https://github.com/opensafely/research-template and click `Use this template`. Follow this instructions [here](https://docs.opensafely.org/en/latest/project_setup/).
+Go to the [research template repository](https://github.com/opensafely/research-template) and click `Use this template`. Follow this instructions [here](https://docs.opensafely.org/en/latest/project_setup/).
 
 
 ### Create a Study Definition
