@@ -169,7 +169,7 @@ This study definition uses two in-built variable extractor functions in OpenSAFE
 
 Now that we've defined the study cohort, we can generate a dummy dataset. Assuming you have the correct technical set-up on your local machine, this is simply a case of submitting the following command in a terminal that can find `cohortextractor` (you can use `cohortextractor --help` to find out more about this command, the available options, defaults, etc.):
 
-```{python,  eval=FALSE}
+```
 cohortextractor generate_cohort --study-definition study_defintion_1_stppop.py --expectations-population 10000 --output-dir=output/cohorts
 ```
 
@@ -179,8 +179,8 @@ This will create a file `input_1_stppop.csv` in the `/output/cohorts/` folder wi
 
 We now have a dummy dataset so we can begin to develop and test our analysis code. For this example, we just want to import the dataset, count the number of STPs, and output to a file. These steps are outlined code-block below, and are available in the file [`/analysis/1-plot-stppop.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/1-plot-stppop.R).
 
-First we import and process the data:
-```{r stppop, , class.source = "fold-hide"}
+First we import and process the data (click "code" to the right to show the code):
+```{r stppop, class.source = "fold-hide", warning = FALSE, message = FALSE, results=FALSE}
 ## import libraries
 library('tidyverse')
 library('sf')
@@ -207,7 +207,7 @@ sf_stppop <- sf_stp %>%
 ```
 
 Then we create a map:
-```{r stppop.map, class.source = "fold-hide"}
+```{r stppop.map, class.source = "fold-hide", warning = FALSE, message = FALSE}
 plot_stppop_map <- sf_stppop %>%
 ggplot() +
   geom_sf(aes(fill=registered), colour='black') +
@@ -223,8 +223,8 @@ ggplot() +
 plot_stppop_map
 ```
 
-Or a bar chart if you prefer:
-```{r stppop.bar, class.source = "fold-hide"}
+Or a bar chart if you prefer (click "code" to the right to show the code):
+```{r stppop.bar, class.source = "fold-hide", warning = FALSE, message = FALSE}
 plot_stppop_bar <- sf_stppop %>%
   mutate(
     name = forcats::fct_reorder(name, registered, median, .desc=FALSE)
@@ -249,7 +249,7 @@ plot_stppop_bar
 ```
 
 
-This is just dummy data. We'll be able to easily rerun the code above on the real dataset to see how this map looks for real. For this, we use the OpenSAFELY Job Runner. 
+This is just dummy data. But we can easily rerun the code above on the real dataset. For this, we use the OpenSAFELY Job Runner. 
 
 ### Create a project pipeline
 
@@ -343,7 +343,7 @@ cohortextractor update_codelists
 
 This will create a `.csv` for each codelist, which are imported to the study definition using
 
-```
+```{python,  eval=FALSE}
 codes_ICD10_covid = codelist_from_csv(
     "codelists/opensafely-covid-identification.csv", 
     system="icd10", 
@@ -357,7 +357,7 @@ Then as before, we define the cohort population and the variables we want to ext
 
 Once again, we use the dummy data to develop the analysis script then create a `project.yaml` to run the entire study on the real data. The analysis script is available in the file [`/analysis/2-plot-deaths.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/2-plot-deaths.R). This script is run by the Job Runner via the `project.yaml` file, then the outputs are reviewed in the server and released via github. The final graph looks like this:
 
-[![](../released-ouput/plots/plot_deaths.png "covid-related deaths"){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_deaths.png)
+[![](../released-ouput/plots/plot_deaths.png "covid-related deaths"){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_deaths.png)
 
 Here you can see the familiar covid mortality bump during the first wave of the pandemic. There is also a bump in non-covid deaths, suggesting that identification of covid-related deaths may not be 100\% sensitive. 
 
@@ -369,7 +369,7 @@ In our final example, we introduce the Measures framework. This enables the extr
 
 The entire study definition is available at [`/analysis/study_definition_3_activity.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_3_activity.py), and we'll pick out some key parts. 
 
-```{python, eval=FALSE, class.source = "fold-show"}
+```{python, eval=FALSE}
 population = patients.satisfying(
         """
         (age >= 18 AND age < 120) AND
@@ -389,7 +389,7 @@ population = patients.satisfying(
 The population declaration says that for each period, we want the set of adult patients who are both alive and registered at the index date.
 
 
-```{python, eval=FALSE, class.source = "fold-show"}
+```{python, eval=FALSE}
 cholesterol = patients.with_these_clinical_events(
         codes_cholesterol,
         returning = "number_of_episodes",
@@ -412,7 +412,7 @@ Then we want to extract the number of cholesterol- or INR-measurement "episodes"
 
 
 
-```{python, eval=FALSE, class.source = "fold-show"}
+```{python, eval=FALSE}
 measures = [
     Measure(
         id="cholesterol_practice",
@@ -467,21 +467,23 @@ Now we have the extracted outputs we can develop our analysis script. The analys
 
 Let's look at the number of measurements in each STP for cholesterol:
 
-[![](../released-ouput/plots/plot_each_cholesterol_stp.png)](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_each_cholesterol_stp.png)
+[![](../released-ouput/plots/plot_each_cholesterol_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_each_cholesterol_stp.png)
 
 and for INR:
 
-[![](../released-ouput/plots/plot_each_inr_stp.png){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_each_inr_stp.png)
+[![](../released-ouput/plots/plot_each_inr_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_each_inr_stp.png)
 
 Clearly there is a substantial dip in activity for cholesterol which corresponds neatly to the first pandemic wave.  This activity dip is similar across all STPs. However, for INR the decline is less pronounced.
 
 
 We can also look at deciles of measurement activity for each GP practice for cholesterol:
-[![](../released-ouput/plots/plot_quantiles_cholesterol_stp.png){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_stp.png)
+
+[![](../released-ouput/plots/plot_quantiles_cholesterol_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_stp.png)
 
 
 and for INR:
-[![](../released-ouput/plots/plot_quantiles_inr_stp.png){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_stp.png)
+
+[![](../released-ouput/plots/plot_quantiles_inr_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_stp.png)
 
 
 
