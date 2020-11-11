@@ -15,6 +15,7 @@ study = StudyDefinition(
 
     default_expectations = {
         "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
+        "rate": "universal"
     },
     
     # This line defines the study population

@@ -8,7 +8,7 @@ output:
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, python.reticulate = FALSE)
 
 ```
 
@@ -72,7 +72,7 @@ This example introduces study definitions, dummy data, and project pipelines. We
 #### Study definition
 We start by defining the study definition. The entire script, called [`study_definition_1_stppop.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop.py) looks like this:
 
-```{python, eval=FALSE, class.source = "fold-show"}
+```{python,  eval=FALSE, class.source = "fold-show"}
 
 ## LIBRARIES
 
