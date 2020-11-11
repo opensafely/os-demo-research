@@ -68,7 +68,7 @@ Let's start with a simple example.
 
 ## Example 1 &mdash; STP patient population
 
-This example introduces study definitions, dummy data, and project pipelines. We're going to use OpenSAFELY to find out how many patients are registered at a TPP practice within each STP (Sustainability and Transformation Partnership) on 1 January 2020. 
+This example introduces study definitions, expectations and dummy data, and project pipelines. We're going to use OpenSAFELY to find out how many patients are registered at a TPP practice within each STP (Sustainability and Transformation Partnership) on 1 January 2020. 
 
 ### Create a git repository
 
@@ -78,42 +78,9 @@ Got to the [research template reposity]https://github.com/opensafely/research-te
 ### Create a Study Definition
 Your newly-created repo will contain a template the study definition. Edit this to suit your needs. In this example, it's a very simple &mdash; the entire file, called [`study_definition_1_stppop.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop.py), looks like this:
 
-```{python,  eval=FALSE}
-
-## LIBRARIES
-
-# cohort extractor
-from cohortextractor import (StudyDefinition, patients)
-
-# dictionary of STP codes (for dummy data)
-from dictionaries import dict_stp
-
-# set the index date
-index_date = "2020-01-01"
-
-## STUDY POPULATION
-
-study = StudyDefinition(
-
-    # this line sets some default expecetations for the dummy data
-    default_expectations = {
-        "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
-    },
-
-    # This line defines the study population
-    population = patients.registered_as_of(index_date),
-
-    # this line defines the stp variable we want to extract
-    stp = patients.registered_practice_as_of(
-        index_date,
-        returning="stp_code",
-        return_expectations={
-            "category": {"ratios": dict_stp},
-        }
-    )
-)
-
+```{python, eval=FALSE, code=readLines("../analysis/study_definition_1_stppop.py")}
 ```
+
 
 Let's break it down:
 
@@ -139,9 +106,10 @@ We then use the `StudyDefinition()` function to define the cohort population and
 default_expectations = {
     "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
     "rate": "uniform",
+    "incidence": 1
 },
 ```
-This defines the default expectations which are used to generate dummy data. This just says that we expect date variables to be uniformlly distributed between the index date and today's date. 
+This defines the default expectations which are used to generate dummy data. This just says that we expect date variables to be uniformly distributed between the index date and today's date. For this study we're not producing any dates. 
 
 ```{python,  eval=FALSE}
 population = patients.registered_as_of(index_date)
@@ -167,7 +135,7 @@ This study definition uses two in-built variable extractor functions in OpenSAFE
 
 ### Generate dummy data
 
-Now that we've defined the study cohort, we can generate a dummy dataset. Assuming you have the correct technical set-up on your local machine, this is simply a case of submitting the following command in a terminal that can find `cohortextractor` (you can use `cohortextractor --help` to find out more about this command, the available options, defaults, etc.):
+Now that we've defined the study cohort, we can generate a dummy dataset. Assuming you have the correct technical set-up on your local machine, this is simply a case of submitting the following command in a Terminal that can find `cohortextractor` (you can use `cohortextractor --help` to find out more about this command, the available options, defaults, etc.):
 
 ```
 cohortextractor generate_cohort --study-definition study_defintion_1_stppop.py --expectations-population 10000 --output-dir=output/cohorts
@@ -320,10 +288,10 @@ In this example, the map looks like this:
 
 and the bar chart looks like this:
 
-[![](../released-ouput/plots/plot_stppop_bar.png "registration count by STP"){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar.png)
+[![](../released-ouput/plots/plot_stppop_bar.png "registration count by STP"){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar.png)
 
 
-Here we're just linking to the released `.png` files in the repo. We could have also released the underlying STP count data and developed an analysis script directly on this data, provided it is non-disclosive. However, typically only the most high-level aggregated datasets are suitable for public release. 
+Here we're just linking to the released `.png` files in the repo (clicking the image takes you there). We could have also released the underlying STP count data and developed an analysis script directly on this dataset, provided it is non-disclosive. However, typically only the most high-level aggregated datasets are suitable for public release. 
 
 
 
@@ -333,7 +301,11 @@ This example introduces codelists. We're going to use OpenSAFELY to look at the 
 
 ### Study definition
 
-The study definition for this task is available at  [`/analysis/study_definition_2_deaths.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_2_deaths.py). 
+The study definition for this task is available at  [`/analysis/study_definition_2_deaths.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_2_deaths.py), and can be viewed by clicking `code` to the right. 
+
+
+```{python, class.source = "fold-hide", eval=FALSE, code=readLines("../analysis/study_definition_2_deaths.py")}
+```
 
 As before, we first import libraries and dictionaries. This time we also import the codelist for identifying covid-related deaths. This uses data from death certificates, which are coded using ICD-10 codes. The covid codes in this system are `U071` and `U072`, and have been collected in a codelist at [codelists.opensafely.org](https://codelists.opensafely.org/codelist/opensafely/covid-identification/2020-06-03). To import the codelists, put the codelist url in the `codelists/codelists.txt` file in the repo, then run the following command:
 
@@ -346,12 +318,12 @@ This will create a `.csv` for each codelist, which are imported to the study def
 ```{python,  eval=FALSE}
 codes_ICD10_covid = codelist_from_csv(
     "codelists/opensafely-covid-identification.csv", 
-    system="icd10", 
-    column="icd10_code"
+    system = "icd10", 
+    column = "icd10_code"
 )
 ```
 
-Then as before, we define the cohort population and the variables we want to extract within `StudyDefinition()`. The variables we extract this time are `age`, `sex`, `date_death`, and `death_category`. These use some new extractor functions and expectation definitions, whose details can be found in the documentation [here](https://docs.opensafely.org/en/latest/study_def_intro/).
+Then as before, we define the cohort population and the variables we want to extract within `StudyDefinition()`. The variables we extract this time are `age`, `sex`, `date_death`, and `death_category`. These use some new extractor functions and some more expectation definitions, whose details can be found in the documentation [here](https://docs.opensafely.org/en/latest/study_def_intro/).
 
 ### Results
 
@@ -367,23 +339,27 @@ In our final example, we introduce the Measures framework. This enables the extr
 
 ### Study Definition
 
-The entire study definition is available at [`/analysis/study_definition_3_activity.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_3_activity.py), and we'll pick out some key parts. 
+The entire study definition is available at [`/analysis/study_definition_3_activity.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_3_activity.py), and can be viewed by clicking `code` to the right. 
+
+```{python, class.source = "fold-hide", eval=FALSE, code=readLines("../analysis/study_definition_3_activity.py")}
+```
+
+We'll pick out some key parts:
 
 ```{python, eval=FALSE}
 population = patients.satisfying(
-        """
-        (age >= 18 AND age < 120) AND
-        (NOT died) AND
-        (registered)
-        """,
-        
-        died = patients.died_from_any_cause(
-		    on_or_before=index_date,
-		    returning="binary_flag"
-	    ),
-        registered = patients.registered_as_of(index_date),
-        age=patients.age_as_of(index_date),
-    )
+    """
+    (age >= 18 AND age < 120) AND
+    (NOT died) AND
+    (registered)
+    """,
+    died = patients.died_from_any_cause(
+      on_or_before = index_date,
+      returning = "binary_flag"
+    ),
+    registered = patients.registered_as_of(index_date),
+    age = patients.age_as_of(index_date),
+)
 ```
 
 The population declaration says that for each period, we want the set of adult patients who are both alive and registered at the index date.
@@ -391,22 +367,22 @@ The population declaration says that for each period, we want the set of adult p
 
 ```{python, eval=FALSE}
 cholesterol = patients.with_these_clinical_events(
-        codes_cholesterol,
-        returning = "number_of_episodes",
-        between = ["index_date", "index_date + 1 month"],
-        return_expectations={
-            "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
-        },
-    ),
+    codes_cholesterol,
+    returning = "number_of_episodes",
+    between = ["index_date", "index_date + 1 month"],
+    return_expectations={
+        "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
+    },
+),
 
-    inr = patients.with_these_clinical_events(
-        codes_inr,
-        returning = "number_of_episodes",
-        between = ["index_date", "index_date + 1 month"],
-        return_expectations={
-            "int": {"distribution": "normal", "mean": 3, "stddev": 0.5}
-        },
-    ),
+inr = patients.with_these_clinical_events(
+    codes_inr,
+    returning = "number_of_episodes",
+    between = ["index_date", "index_date + 1 month"],
+    return_expectations={
+        "int": {"distribution": "normal", "mean": 3, "stddev": 0.5}
+    },
+),
 ```
 Then we want to extract the number of cholesterol- or INR-measurement "episodes" recorded during the month beginning the index date. The `codes_cholesterol` and the `codes_inr` codelists are defined similarly to the `codes_ICD10_covid` in example 2. Using expectations, we say the dummy values for these variables will be a low-valued integer.
 
