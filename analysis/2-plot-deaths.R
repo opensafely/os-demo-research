@@ -32,23 +32,24 @@ df_cleaned <- df_input %>%
       #labels = ,
       dig.lab = 2,
     ),
+    week_death = date_death,
     time_to_coviddeath = if_else(is.na(date_death), as.Date("2020-10-01") - as.Date("2020-01-01"), as.Date(date_death) - as.Date("2020-01-01")),
     event = (!is.na(date_death)) & (death_category == "covid-death")
   )
 
 df_deathsperday <- df_cleaned %>%
   filter(!is.na(date_death)) %>%
-  group_by(date_death, death_category, sex) %>%
+  group_by(date_death, death_category, sex, age_group) %>%
   summarise(n=n(), .groups="drop")
 
 plot_deaths <- df_deathsperday %>%
 ggplot() +
-  geom_bar(aes(x=date_death, y=n, fill=death_category), stat="identity", colour="transparent")+
-  facet_grid(cols=vars(sex))+
+  geom_area(aes(x=date_death, y=n, fill=age_group), stat="identity", colour="transparent") +
+  facet_grid(cols=vars(sex), rows=vars(death_category))+
   labs(x=NULL, y=NULL, fill=NULL, title="Daily deaths, covid versus non-covid")+
   scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
   scale_y_continuous(expand = c(0, 0))+
-  scale_fill_brewer(palette="Set2")+
+  scale_fill_viridis_d()+#(palette="Set2")+
   coord_cartesian(clip = 'off') +
   theme_minimal()+
   theme(
