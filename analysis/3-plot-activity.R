@@ -6,14 +6,14 @@ library('tidyverse')
 
 # create measures look-up
 md_tbl <- tibble(
-  measure = c("cholesterol", "cholesterol", "cholesterol", "inr", "inr", "inr"),
-  measure_label = c("Cholesterol", "Cholesterol", "Cholesterol", "INR", "INR", "INR"),
-  by = c("overall", "practice", "stp", "overall", "practice", "stp"),
-  by_label = c("overall", "by practice", "by STP", "overall", "by practice", "by STP"),
+  measure = c("cholesterol", "cholesterol", "inr", "inr"),
+  measure_label = c("Cholesterol", "Cholesterol", "INR", "INR"),
+  by = c("practice", "stp", "practice", "stp"),
+  by_label = c("by practice", "by STP", "by practice", "by STP"),
   id = paste0(measure, "_", by),
   numerator = measure,
   denominator = "population",
-  group_by = c("allpatients", "practice", "stp", "allpatients", "practice", "stp"),
+  group_by = c("practice", "stp", "practice", "stp"),
 )
 
 ## import measures data from look-up
@@ -36,7 +36,7 @@ measures_plots <- measures %>%
                   function(group_by, data, measure_label, by_label){
                     data %>% mutate(value_10000 = value*10000) %>%
                     ggplot()+
-                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue', size=0.5)+
+                      geom_line(aes_string(x="date", y="value_10000", group=group_by), alpha=0.2, colour='blue', size=0.2)+
                       scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
                         x=NULL, y=NULL, 
@@ -59,7 +59,7 @@ measures_plots <- measures %>%
                       ggplot()+
                       geom_line(aes(x=date, y=value_10000, group=value_q, linetype=value_q==0.5, size=value_q==0.5), colour='blue')+
                       scale_linetype_manual(breaks=c(TRUE, FALSE), values=c("solid", "dotted"), guide=FALSE)+
-                      scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.5), guide=FALSE)+
+                      scale_size_manual(breaks=c(TRUE, FALSE), values=c(1, 0.2), guide=FALSE)+
                       scale_x_date(date_breaks = "1 month", labels = scales::date_format("%Y-%m"))+
                       labs(
                         x=NULL, y=NULL, 
