@@ -46,7 +46,7 @@ It also performs other useful tasks like importing codelists and generating _Mea
 
 For researchers using the platform, the OpenSAFELY workflow for a single study is typically as follows:
 
-1. **Create a git repository** from the template provided
+1. **Create a git repository** from the template provided and clone it on your local machine
 2. **Create a Study Definition** that specifies what data you want to extract from the database:
     * Specify the patient population (dataset rows) and variables (dataset columns)
     * Specify the expected distributions of these variables for use in dummy data
@@ -468,8 +468,13 @@ and for INR:
 
 
 
-## Future developments
+## Future developments on the OpenSAFELY roadmap
 
-* Better dummy data, respecting between-variable dependencies and pre-loaded dictionaries
+* Better dummy data, respecting between-variable dependencies and providing pre-loaded dictionaries
+* Automated comparisons between dummy data and real data
+* Automated disclosivity checks
 * Fast patient matching algorithms for example for case-control studies
-* 
+* More comprehensive population coverage
+* More external datasets
+* Live dashborads of health service activity
+* etc, etc
