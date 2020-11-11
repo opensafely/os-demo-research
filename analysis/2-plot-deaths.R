@@ -40,7 +40,8 @@ df_cleaned <- df_input %>%
 df_deathsperday <- df_cleaned %>%
   filter(!is.na(date_death)) %>%
   group_by(date_death, death_category, sex, age_group) %>%
-  summarise(n=n(), .groups="drop")
+  summarise(n=n(), .groups="drop") %>%
+  complete(date_death, death_category, sex, age_group, fill = list(n=0))
 
 plot_deaths <- df_deathsperday %>%
 ggplot() +
@@ -53,6 +54,8 @@ ggplot() +
   coord_cartesian(clip = 'off') +
   theme_minimal()+
   theme(
+    legend.position = "left",
+    strip.text.y.right = element_text(angle = 0),
     axis.line.x = element_line(colour = "black"),
     axis.text.x = element_text(angle = 70, vjust = 1, hjust=1),
     panel.grid.major.x = element_blank(),
