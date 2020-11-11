@@ -19,14 +19,13 @@ from codelists import *
 # Defines both the study population and points to the important covariates
 
 index_date = "2020-01-01"
-end_date = "2020-10-01"
-today = "2020-10-21"
+end_date = "2020-09-30"
 
 
 study = StudyDefinition(
         # Configure the expectations framework
     default_expectations={
-        "date": {"earliest": index_date, "latest": "today"},
+        "date": {"earliest": index_date, "latest": end_date},
         "rate": "uniform",
         "incidence": 0.2,
     },
