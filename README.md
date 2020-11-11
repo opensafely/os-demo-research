@@ -1,6 +1,10 @@
 # OpenSAFELY demo materials
 
+This repo contains the code for an OpenSAFELY walkthrough in R.
 
+To see the fully-rendered document, visit https://nbviewer.jupyter.org/github/opensafely/os-demo-research/blob/master/rmarkdown/Rdemo.html
+
+To see a github-flavoured rendering with some features disabled, visit [`/rmarkdown/Rdemo.md`]("/rmarkdown/Rdemo.md")
 
 # About the OpenSAFELY framework
 
