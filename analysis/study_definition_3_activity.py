@@ -13,7 +13,18 @@ from cohortextractor import (
 
 ## CODELISTS
 # All codelist are held within the codelist/ folder.
-from codelists import *
+codes_cholesterol = codelist_from_csv(
+    "codelists-local/cholesterol-measurement.csv", 
+    system = "ctv3", 
+    column = "id"
+)
+
+codes_inr = codelist_from_csv(
+    "codelists-local/international-normalised-ratio-measurement.csv", 
+    system = "ctv3", 
+    column = "id"
+)
+
 
 # dictionary of STP codes (for dummy data)
 from dictionaries import dict_stp
