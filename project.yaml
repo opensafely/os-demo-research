@@ -14,7 +14,7 @@ actions:
         cohort: output/cohorts/input_1_stppop.csv
 
   plot_stppop:
-    run: r:latest analysis/1-plot-stppop.R
+    run: r-next:latest analysis/1-plot-stppop.R
     needs: [generate_cohort_stppop]
     outputs:
       moderately_sensitive:
@@ -33,7 +33,7 @@ actions:
         cohort: output/cohorts/input_2_deaths.csv
 
   plot_deaths:
-    run: r:latest analysis/2-plot-deaths.R
+    run: r-next:latest analysis/2-plot-deaths.R
     needs: [generate_cohort_deaths]
     outputs:
       moderately_sensitive:
@@ -56,7 +56,7 @@ actions:
         measure_csv: output/measures/measure_*.csv 
 
   plot_activity:
-    run: r:latest analysis/3-plot-activity.R
+    run: r-next:latest analysis/3-plot-activity.R
     needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
