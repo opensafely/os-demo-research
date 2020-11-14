@@ -24,8 +24,11 @@ sf_stp <- st_read(here::here("lib", "STPshapefile.json"))
 df_stppop = df_input %>% count(stp, name='registered')
 
 sf_stppop <- sf_stp %>% 
-  left_join(df_stppop, by = c("ons_code" = "stp")) %>%
+  full_join(df_stppop, by = c("ons_code" = "stp")) %>%
   mutate(registered = if_else(!is.na(registered), registered, 0L))
+
+
+write_csv(data.frame(sf_stppop)[c("name", "ons_code", "registered")], file = here::here("output", "plots", "table.csv"))
 
 plot_stppop_map <- sf_stppop %>%
 ggplot() +

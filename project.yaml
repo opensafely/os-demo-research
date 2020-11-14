@@ -21,6 +21,7 @@ actions:
         log: output/logs/log-1-plot-stppop.txt
         figure1: output/plots/plot_stppop_map.png
         figure2: output/plots/plot_stppop_bar.png
+        table: output/plots/table.csv
 
 
 
