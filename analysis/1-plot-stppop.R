@@ -1,5 +1,5 @@
 
-library('here')
+
 ## open log connection to file
 sink(here::here("output", "logs", "log-1-plot-stppop.txt"))
 
