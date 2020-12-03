@@ -426,7 +426,7 @@ Finally, we define the measures that we want to calculate. Here we want four mea
 As before, we generate dummy data using the `generate_cohort` command in the `cohortextractor`, but this time, we include an `--index-date-range` option so that it extracts a new cohort for each date specified, as follows:
 
 ```
-cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month"
+cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
 ```
 
 Here we go from 1 January 2020 to 1 September 2020 in monthly increments. These dates are passed to the `index_date` variable in the study definition. This will produce a set of `input_3_activity_<date>.csv` files, each with `10000` rows of dummy data.
@@ -434,7 +434,7 @@ Here we go from 1 January 2020 to 1 September 2020 in monthly increments. These 
 An additional step is now needed to generate the measures. This is done as follows:
 
 ```
-cohortextractor generate_measures --study-definition study_definition_3_activity
+cohortextractor generate_measures --study-definition study_definition_3_activity --output-dir=output/measures
 ```
 
 which will produce a set of files of the form `measure_<id>.csv`. 
