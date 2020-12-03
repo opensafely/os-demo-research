@@ -140,7 +140,7 @@ This study definition uses two in-built variable extractor functions in OpenSAFE
 Now that we've defined the study cohort, we can generate a dummy dataset. Assuming you have the correct technical set-up on your local machine, this is simply a case of submitting the following command in a Terminal that can find `cohortextractor` (you can use `cohortextractor --help` to find out more about this command, the available options, defaults, etc.):
 
 ```
-cohortextractor generate_cohort --study-definition study_defintion_1_stppop.py --expectations-population 10000 --output-dir=output/cohorts
+cohortextractor generate_cohort --study-definition study_definition_1_stppop --expectations-population 10000 --output-dir=output/cohorts
 ```
 
 This will create a file `input_1_stppop.csv` in the `/output/cohorts/` folder with `10000` rows. 
