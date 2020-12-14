@@ -34,7 +34,7 @@ there are some technical pre-requisites that users must satisfy to use
 the platform. These include installing and using git and python, though
 typically only a narrow set of actions are required and guide-rails are
 provided. These details can be read in the documentation pages, starting
-[here](https://docs.opensafely.org/en/latest/min_req/). The walkthrough
+[here](https://docs.opensafely.org/en/latest/install-intro/). The walkthrough
 assumes that the technical set-up has been completed.
 
 ### Key concepts
@@ -115,7 +115,7 @@ many patients are registered at a TPP practice within each STP
 Go to the [research template
 repository](https://github.com/opensafely/research-template) and click
 `Use this template`. Follow this instructions
-[here](https://docs.opensafely.org/en/latest/project_setup/).
+[here](https://docs.opensafely.org/en/latest/workflow-make-repo/).
 
 ### Create a Study Definition
 
@@ -336,7 +336,6 @@ The primary purpose of the pipeline is to specify the execution order for all yo
 A `project.yaml` for this simple example will look like this:
 
 ``` yaml
-
 version: '3.0'
 
 expectations:
@@ -607,23 +606,22 @@ want to extract within `StudyDefinition()`. The variables we extract
 this time are `age`, `sex`, `date_death`, and `death_category`. These
 use some new extractor functions and some more expectation definitions,
 whose details can be found in the documentation
-[here](https://docs.opensafely.org/en/latest/study_def_intro/).
+[here](https://docs.opensafely.org/en/latest/study-def-variables/).
 
 ### Results
 
-Once again, we use the dummy data to develop the analysis script then
-create a `project.yaml` to run the entire study on the real data. The
-analysis script is available in the file
+Once again, we create a `project.yaml` to define the analysis steps and run the study in the development on dummy data and in production on the real data.
+The analysis script is available in the file
 [`/analysis/2-plot-deaths.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/2-plot-deaths.R).
-This script is run by the Job Runner via the `project.yaml` file, then
+This script is run by the Job Server via the `project.yaml` file, then
 the outputs are reviewed in the server and released via github. The
 final graph looks like this:
 
 [<img src="../released-ouput/plots/plot_deaths.png" title="covid-related deaths" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_deaths.png)
 
 Here you can see the familiar covid mortality bump during the first wave
-of the pandemic. There is also a bump in non-covid deaths, suggesting
-that identification of covid-related deaths may not be 100% sensitive.
+of the pandemic. There is also a bump in non-covid deaths, suggesting perhaps
+that identification of covid-related deaths may not be 100% sensitive, or that health services struggled during this period, or that people we not seeking the care they needed.
 
 Example 3 &mdash; Primary care activity throughout the pandemic.
 ----------------------------------------------------------
@@ -852,29 +850,46 @@ practice/STP. For more details on Measures, see the documentation
 
 ### Generating measures
 
-As before, we generate dummy data using the `generate_cohort` command in
-the `opensafely` module, but this time, we include an `--index-date-range`
-option so that it extracts a new cohort for each date specified, as
-follows:
+As before, we generate dummy data and analyse the dummy data by using actions defined in the `project.yaml`. The actions for this example look like this:
 
-    cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month"
 
+``` yaml
+generate_cohort_activity:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_3_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
+    outputs:
+      highly_sensitive:
+        cohort: output/measures/input_3_activity_*.csv
+
+  generate_measures_activity:
+    run: cohortextractor:latest generate_measures --study-definition study_definition_3_activity --output-dir=output/measures
+    needs: [generate_cohort_activity]
+    outputs:
+      moderately_sensitive:
+        measure_csv: output/measures/measure_*.csv 
+
+  plot_activity:
+    run: r:latest analysis/3-plot-activity.R
+    needs: [generate_measures_activity]
+    outputs:
+      moderately_sensitive:
+        log: output/logs/log-3-plot-activity.txt
+        figure: output/plots/plot_*.png
+
+```
+
+The data generation action now includes a `--index-date-range "2020-01-01 to 2020-09-01 by month"`
+option, so that it extracts a new cohort for each date specified. 
 Here we go from 1 January 2020 to 1 September 2020 in monthly
 increments. These dates are passed to the `index_date` variable in the
 study definition. This will produce a set of
 `input_3_activity_<date>.csv` files, each with `10000` rows of dummy
 data.
 
-An additional step is now needed to generate the measures. This is done
-as follows:
-
-    cohortextractor generate_measures --study-definition study_definition_3_activity
-
-which will produce a set of files of the form `measure_<id>.csv`.
+An additional step is now needed to generate the measures. This is done using the `generate_measures` command fromthe `cohortextractor`, which will produce a set of files of the form `measure_<id>.csv`.
 
 ### Results
 
-Now we have the extracted outputs we can develop our analysis script.
+Now we have the extracted outputs we can develop our analysis script and run it.
 The analysis script for this can be found at
 [`/analysis/3-plot-activity.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/3-plot-activity.R).
 
