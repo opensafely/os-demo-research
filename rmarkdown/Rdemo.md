@@ -1,4 +1,5 @@
-## Introduction
+Introduction
+------------
 
 OpenSAFELY is a new secure analytics platform for electronic health
 records in the NHS, created to deliver urgent research during the global
@@ -101,7 +102,8 @@ repository is saved (“pushed”) to GitHub.
 
 Let’s start with a simple example.
 
-## Example 1 — STP patient population
+Example 1 — STP patient population
+----------------------------------
 
 This example introduces study definitions, expectations and dummy data,
 and project pipelines. We’re going to use OpenSAFELY to find out how
@@ -244,7 +246,7 @@ Terminal that can find `cohortextractor` (you can use
 `cohortextractor --help` to find out more about this command, the
 available options, defaults, etc.):
 
-    cohortextractor generate_cohort --study-definition study_definition_1_stppop --expectations-population 10000 --output-dir=output/cohorts
+    cohortextractor generate_cohort --study-definition study_defintion_1_stppop.py --expectations-population 10000 --output-dir=output/cohorts
 
 This will create a file `input_1_stppop.csv` in the `/output/cohorts/`
 folder with `10000` rows.
@@ -348,6 +350,7 @@ in a file called `project.yaml`, which lives in the root directory of
 the repo. This is best demonstrated with an example:
 
 ``` yaml
+
 version: '3.0'
 
 expectations:
@@ -446,7 +449,8 @@ underlying STP count data and developed an analysis script directly on
 this dataset, provided it is non-disclosive. However, typically only the
 most high-level aggregated datasets are suitable for public release.
 
-## Example 2 — Covid versus non-covid deaths
+Example 2 — Covid versus non-covid deaths
+-----------------------------------------
 
 This example introduces codelists. We’re going to use OpenSAFELY to look
 at the frequency of covid-related deaths compared with non-covid deaths
@@ -615,7 +619,8 @@ Here you can see the familiar covid mortality bump during the first wave
 of the pandemic. There is also a bump in non-covid deaths, suggesting
 that identification of covid-related deaths may not be 100% sensitive.
 
-## Example 3 — Primary care activity throughout the pandemic.
+Example 3 — Primary care activity throughout the pandemic.
+----------------------------------------------------------
 
 In our final example, we introduce the Measures framework. This enables
 the extraction of multiple study cohorts each covering different time
@@ -846,7 +851,7 @@ the `cohortextractor`, but this time, we include an `--index-date-range`
 option so that it extracts a new cohort for each date specified, as
 follows:
 
-    cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
+    cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month"
 
 Here we go from 1 January 2020 to 1 September 2020 in monthly
 increments. These dates are passed to the `index_date` variable in the
@@ -857,7 +862,7 @@ data.
 An additional step is now needed to generate the measures. This is done
 as follows:
 
-    cohortextractor generate_measures --study-definition study_definition_3_activity --output-dir=output/measures
+    cohortextractor generate_measures --study-definition study_definition_3_activity
 
 which will produce a set of files of the form `measure_<id>.csv`.
 
@@ -889,7 +894,8 @@ and for INR:
 
 [<img src="../released-ouput/plots/plot_quantiles_inr_stp.png" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
 
-## Future developments on the OpenSAFELY roadmap
+Future developments on the OpenSAFELY roadmap
+---------------------------------------------
 
 -   Better dummy data, respecting between-variable dependencies and
     providing pre-loaded dictionaries

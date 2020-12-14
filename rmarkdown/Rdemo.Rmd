@@ -140,7 +140,7 @@ This study definition uses two in-built variable extractor functions in OpenSAFE
 Now that we've defined the study cohort, we can generate a dummy dataset. Assuming you have the correct technical set-up on your local machine, this is simply a case of submitting the following command in a Terminal that can find `cohortextractor` (you can use `cohortextractor --help` to find out more about this command, the available options, defaults, etc.):
 
 ```
-cohortextractor generate_cohort --study-definition study_definition_1_stppop --expectations-population 10000 --output-dir=output/cohorts
+cohortextractor generate_cohort --study-definition study_defintion_1_stppop.py --expectations-population 10000 --output-dir=output/cohorts
 ```
 
 This will create a file `input_1_stppop.csv` in the `/output/cohorts/` folder with `10000` rows. 
@@ -426,7 +426,7 @@ Finally, we define the measures that we want to calculate. Here we want four mea
 As before, we generate dummy data using the `generate_cohort` command in the `cohortextractor`, but this time, we include an `--index-date-range` option so that it extracts a new cohort for each date specified, as follows:
 
 ```
-cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
+cohortextractor generate_cohort --study-definition study_definition_3_activity --expectations-population 10000 --index-date-range "2020-01-01 to 2020-09-01 by month"
 ```
 
 Here we go from 1 January 2020 to 1 September 2020 in monthly increments. These dates are passed to the `index_date` variable in the study definition. This will produce a set of `input_3_activity_<date>.csv` files, each with `10000` rows of dummy data.
@@ -434,7 +434,7 @@ Here we go from 1 January 2020 to 1 September 2020 in monthly increments. These 
 An additional step is now needed to generate the measures. This is done as follows:
 
 ```
-cohortextractor generate_measures --study-definition study_definition_3_activity --output-dir=output/measures
+cohortextractor generate_measures --study-definition study_definition_3_activity
 ```
 
 which will produce a set of files of the form `measure_<id>.csv`. 
