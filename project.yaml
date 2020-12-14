@@ -63,13 +63,3 @@ actions:
         log: output/logs/log-3-plot-activity.txt
         figure: output/plots/plot_*.png
        
-
-  run_all:
-    needs: [plot_stppop, plot_deaths, plot_activity]
-    # In order to be valid this action needs to define a run commmand and
-    # some output. We don't really care what these are but the below seems to
-    # do the trick.
-    run: cohortextractor:latest --version
-    outputs:
-      moderately_sensitive:
-        whatever: project.yaml
