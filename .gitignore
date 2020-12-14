@@ -6,6 +6,7 @@ model.log
 __pycache__
 .python-version
 output/*
+metadata/*
 tmp-storage/*
 
 ## notebook files
