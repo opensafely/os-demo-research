@@ -8,7 +8,7 @@ library('tidyverse')
 
 ## import measures data
 df_input <- read_csv(
-  here::here("output", "cohorts", "input_2_deaths.csv"), 
+  here::here("output", "cohorts", "input_2_deaths.csv"),
   col_types = cols(
     patient_id = col_integer(),
     age = col_double(),
@@ -35,7 +35,8 @@ df_cleaned <- df_input %>%
     week_death = date_death,
     time_to_coviddeath = if_else(is.na(date_death), as.Date("2020-10-01") - as.Date("2020-01-01"), as.Date(date_death) - as.Date("2020-01-01")),
     event = (!is.na(date_death)) & (death_category == "covid-death")
-  )
+  ) %>%
+  filter(death_category!="alive")
 
 df_deathsperday <- df_cleaned %>%
   filter(!is.na(date_death)) %>%
@@ -63,8 +64,8 @@ ggplot() +
   )
 
 ggsave(
-  plot= plot_deaths, 
-  filename="plot_deaths.png", path=here::here("output", "plots"), 
+  plot= plot_deaths,
+  filename="plot_deaths.png", path=here::here("output", "plots"),
   units = "cm",
   height = 10,
   width = 15

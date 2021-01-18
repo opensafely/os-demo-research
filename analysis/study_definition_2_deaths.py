@@ -79,7 +79,7 @@ study = StudyDefinition(
         {
             "covid-death": "died_covid",
             "non-covid-death": "(NOT died_covid) AND died_any",
-            "" : "DEFAULT"
+            "alive" : "DEFAULT"
         },
 
         died_covid = patients.with_these_codes_on_death_certificate(
@@ -95,7 +95,7 @@ study = StudyDefinition(
         ),
 
         return_expectations = {
-            "category": {"ratios": {"": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, 
+            "category": {"ratios": {"alive": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, 
             "incidence": 1
         },
     ),
