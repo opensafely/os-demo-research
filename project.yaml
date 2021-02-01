@@ -18,10 +18,8 @@ actions:
     needs: [generate_cohort_stppop]
     outputs:
       moderately_sensitive:
-        log: output/logs/log-1-plot-stppop.txt
         figure1: output/plots/plot_stppop_map.png
         figure2: output/plots/plot_stppop_bar.png
-
 
 
 # actions to plot deaths over time
@@ -37,7 +35,6 @@ actions:
     needs: [generate_cohort_deaths]
     outputs:
       moderately_sensitive:
-        log: output/logs/log-2-plot-deaths.txt
         figure: output/plots/plot_deaths.png
 
 # actions to plot gp activity over time
@@ -60,6 +57,5 @@ actions:
     needs: [generate_measures_activity]
     outputs:
       moderately_sensitive:
-        log: output/logs/log-3-plot-activity.txt
         figure: output/plots/plot_*.png
        
