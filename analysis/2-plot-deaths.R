@@ -1,8 +1,3 @@
-
-## open log connection to file
-sink(here::here("output", "logs", "log-2-plot-deaths.txt"))
-
-
 ## import libraries
 library('tidyverse')
 
@@ -70,7 +65,3 @@ ggsave(
   height = 10,
   width = 15
 )
-
-
-## close log connection
-sink()
