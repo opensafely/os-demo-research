@@ -3,10 +3,10 @@ title: "An OpenSAFELY platform demonstration using R"
 author: "Will Hulme, Researcher, The DataLab, University of Oxford"
 date: "18/01/2021"
 output:
+  md_document:
+    variant: gfm
   html_document:
     code_folding: show
-  md_document:
-    variant: markdown_github
 ---
 
 ```{r setup, include=FALSE}
