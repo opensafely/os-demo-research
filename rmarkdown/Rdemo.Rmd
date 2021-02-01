@@ -206,7 +206,7 @@ opensafely run generate_cohort_stppop
 This will create a file `input_1_stppop.csv` in the `/output/cohorts/` folder with `10000` rows. 
 
 It will also create log files in the `metadata/` folder, for debugging. 
-Securiity-wise, this log file is treated as `moderately_sensitive`.
+Security-wise, this log file is treated as `moderately_sensitive`.
 
 ### Develop analysis scripts
 
