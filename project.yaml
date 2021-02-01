@@ -74,4 +74,5 @@ actions:
     needs: [generate_cohort_stppop_map]
     outputs:
       moderately_sensitive:
-        figure: output/plots/plot_stppop_map.png
+        figure1: output/plots/plot_stppop_bar_names.png
+        figure2: output/plots/plot_stppop_map.png
