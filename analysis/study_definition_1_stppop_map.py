@@ -3,6 +3,9 @@
 # cohort extractor
 from cohortextractor import (StudyDefinition, patients)
 
+# dictionary of STP codes (for dummy data)
+from dictionaries import dict_stp
+
 # set the index date
 index_date = "2020-01-01"
 
@@ -24,7 +27,7 @@ study = StudyDefinition(
         index_date,
         returning="stp_code",
         return_expectations={
-            "category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}},
+            "category": {"ratios": dict_stp},
         },
     ),
 )
