@@ -338,7 +338,7 @@ codes_ICD10_covid = codelist_from_csv(
 )
 ```
 
-Then as before, we define the cohort population and the variables we want to extract within a study definition.  Here we utilise the satisfying function to define a population who meet a range of criteria.
+Then as before, we define the cohort population and the variables we want to extract within a study definition.  Here we utilise the `satisfying` function to define a population who meet a range of criteria.
 
 ```{python,  eval=FALSE}
 population = patients.satisfying(
