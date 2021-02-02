@@ -3,10 +3,10 @@ title: "An OpenSAFELY platform demonstration using R"
 author: "Will Hulme, Researcher, The DataLab, University of Oxford"
 date: "18/01/2021"
 output:
-  md_document:
-    variant: gfm
   html_document:
     code_folding: show
+  md_document:
+    variant: gfm
 ---
 
 ```{r setup, include=FALSE}
@@ -121,7 +121,7 @@ default_expectations = {
     "incidence": 1
 },
 ```
-This defines the default expectations which are used to generate dummy data. This just says that we expect date variables to be uniformly distributed between the index date and today's date. For this study we're not producing any dates. 
+This defines the default expectations which are used to generate dummy data. This just says that we expect date variables to be uniformly distributed between the index date and today's date. For this study we're not producing any dates. An overview of all the options available for dummy data can be found [here](https://docs.opensafely.org/en/latest/study-def/#all-options)
 
 ```{python,  eval=FALSE}
 population = patients.registered_as_of(index_date)
@@ -195,7 +195,7 @@ The file begins with some housekeeping that specifies which version to use and t
 The main part of the yaml file is the `actions` section. In this example we have two actions:
 
 * `generate_cohort_stppop` is the action to extract the dataset from the database. The `run` section gives the extraction command (`generate_cohort`), which study definition to use (`--study-definition study_definition_1_stppop`) and where to put the output (`--output-dir = output/cohorts`). The `outputs` section declares that the expected output is `highly_sensitive` and shouldn't be considered for release.
-* `plot_stppop` is the action that runs the R script (defined below). The `run` section tells it which script to run. The `needs` section says that this action cannot be run without having first run the `geenrate_cohort_stppop` action. The `outputs` sections declares that the expected outputs (a log file for debugging, and the two plots) are `moderately_sensitive` and should be considered for release after disclosivity checks.
+* `plot_stppop` is the action that runs the R script (defined below). The `run` section tells it which script to run. The `needs` section says that this action cannot be run without having first run the `generate_cohort_stppop` action. The `outputs` sections declares that the expected outputs (a log file for debugging, and the two plots) are `moderately_sensitive` and should be considered for release after disclosivity checks.
 
 To run the first action, open a command line terminal that can find the `opensafely` module, and run
 
@@ -207,6 +207,8 @@ This will create a file `input_1_stppop.csv` in the `/output/cohorts/` folder wi
 
 It will also create log files in the `metadata/` folder, for debugging. 
 Security-wise, this log file is treated as `moderately_sensitive`.
+
+Note that the population argument is not encompassed in the dummy data, as [explained here](https://docs.opensafely.org/en/latest/study-def/#dummy-data-versus-real-data)
 
 ### Develop analysis scripts
 
@@ -336,9 +338,32 @@ codes_ICD10_covid = codelist_from_csv(
 )
 ```
 
-Then as before, we define the cohort population and the variables we want to extract within a study definition, define a `cohortextractor` action in the `project.yaml` file, and run using `opensafely run`.
-The variables we extract this time are `age`, `sex`, `date_death`, and `death_category`. 
-These use some new variable functions and some more expectation definitions, whose details can be found in the documentation [here](https://docs.opensafely.org/en/latest/study_def_intro/).
+Then as before, we define the cohort population and the variables we want to extract within a study definition.  Here we utilise the satisfying function to define a population who meet a range of criteria.
+
+```{python,  eval=FALSE}
+population = patients.satisfying(
+        """
+        (sex = 'F' OR sex = 'M') AND
+        (age >= 18 AND age < 120) AND
+        (NOT died) AND
+        (registered)
+        """,
+        
+        registered = patients.registered_as_of(index_date),
+        died = patients.died_from_any_cause(
+            on_or_before=index_date,
+            returning="binary_flag",
+        ),
+    ),
+```
+
+The first argument states the series of conditions patients must satisfy to be included.  After this, the variables in the condition statement can be defined.Note that these variables can either be defined under this statement (as with `registered` and `died`) or elsewhere in the study definition.
+
+Here `registered` is used to extract patients registered as of the index date and `died` is used to extract any patients that died on or before the index date. As for many in-built variable functions, `patients.died_from_any_cause()` has multiple options for how the variable should returned, defined by `returning`. Here we are interested in whether the patient has died or not so use the option `"binary_flag"`.
+
+As before, we then define a `cohortextractor` action in the `project.yaml` file, and run using `opensafely run`.The other variables extracted are `sex`, `date_death`, and `death_category`.These use some new variable functions and some more expectation definitions, whose details can be found in the documentation [here](https://docs.opensafely.org/en/latest/study-def-variables/).
+
+If you are defining a population satisfying a list of criteria, as here, you will likely wish to produce a inclusion/exclusion flowchart.  Instructions on how to do this can be found [here](https://docs.opensafely.org/en/latest/study-def-flowcharts/)
 
 ### Results
 
@@ -350,7 +375,7 @@ The final graph looks like this:
 [![](../released-ouput/plots/plot_deaths.png "covid-related deaths"){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_deaths.png)
 
 Here you can see the familiar covid mortality bump during the first wave of the pandemic. 
-There is also a bump in non-covid deaths, suggesting that identification of covid-related deaths may not be 100\% sensitive, or that health services struggled during this period, or that people we not seeking the care they needed.
+There is also a bump in non-covid deaths, suggesting that identification of covid-related deaths may not be 100\% sensitive, or that health services struggled during this period, or that people are not seeking the care they needed.
 
 ## Example 3 &mdash; Primary care activity throughout the pandemic.
 
