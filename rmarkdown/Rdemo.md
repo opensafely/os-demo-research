@@ -3,8 +3,8 @@
 OpenSAFELY is a secure analytics platform for electronic health records
 in the NHS, created to deliver urgent research during the global
 COVID-19 emergency. It is now successfully delivering analyses across
-more than 24 million patients’ full pseudonymised primary care NHS
-records, with more to follow shortly.
+more than 58 million patients’ full pseudonymised primary care NHS
+records.
 
 All our analytic software is open for security review, scientific
 review, and re-use. OpenSAFELY uses a new model for enhanced security
@@ -19,7 +19,7 @@ This document is intended as a short walkthrough of the OpenSAFELY
 platform. Please visit
 [docs.opensafely.org](https://docs.opensafely.org/en/latest/) for more
 comprehensive documentation, and
-[opensafely.org/](https://opensafely.org/) for any other info.
+[opensafely.org](https://opensafely.org/) for any other info.
 
 The examples in this document are all available in the
 [os-demo-research](https://github.com/opensafely/os-demo-research)
@@ -32,9 +32,15 @@ ensuring complete computational and analytical transparency. As such
 there are some technical pre-requisites that users must satisfy to use
 the platform. These include installing and using git and python, though
 typically only a narrow set of actions are required and guide-rails are
-provided. These details can be read in the documentation pages, starting
-[here](https://docs.opensafely.org/en/latest/min_req/). The walkthrough
-assumes that the technical set-up has been completed.
+provided. These details can be found in [the documentation
+pages](https://docs.opensafely.org/getting-started/), which also
+provides an alternative option to installing requirements locally, using
+the [Gitpod](https://gitpod.io) service. It is recommended that you
+follow the [Getting Started
+guide](https://docs.opensafely.org/getting-started/) for an introduction
+to the technical requirements and basic workflow before working through
+this walkthrough. The walkthrough assumes that the technical set-up has
+been completed.
 
 ### Key concepts
 
@@ -60,9 +66,10 @@ assumes that the technical set-up has been completed.
     `process_data.R`, which depends on the study dataset having been
     extracted. This reduces redundancies by only running scripts that
     need to be run.
--   The *`opensafely` command-line interface* is used to run actions
-    defined in the project pipelines, as well as other useful tasks like
-    importing codelists.
+-   The *\[`opensafely` command-line
+    interface\])(<https://github.com/opensafely-core/opensafely-cli>)*
+    is used to run actions defined in the project pipelines, as well as
+    other useful tasks like importing codelists.
 -   The **job server** runs the actions defined in the project pipeline
     using real data. You can see it at
     [jobs.opensafely.org](https://jobs.opensafely.org).
@@ -70,10 +77,7 @@ assumes that the technical set-up has been completed.
 ### Workflow
 
 For researchers using the platform, the OpenSAFELY workflow for a single
-study is typically as follows:
-
-The workflow for a single study can typically be broken down into the
-following steps:
+study can typically be broken down into the following steps:
 
 1.  **Create a git repository** from the template repository provided
     and clone it on your local machine. This repo will contain all the
@@ -86,9 +90,9 @@ following steps:
     -   specify the expected distributions of these variables for use in
         dummy data
     -   specify the codelists required by the study definition, hosted
-        by [codelists.opensafely.org](https://codelists.opensafely.org),
-        and import them to the repo.
-3.  **Generate dummy data** based on the study sefinition, for writing
+        by [opencodelists.org](https://www.opencodelists.org/), and
+        import them to the repo.
+3.  **Generate dummy data** based on the study definition, for writing
     and testing code.
 4.  **Develop analysis scripts** using the dummy data in R, Stata, or
     Python. This will include:
@@ -99,8 +103,10 @@ following steps:
     -   generating log files to debug the scripts when they run on the
         real data.
 5.  **Test the code** by running the analysis steps specified in the
-    *project pipeline*, which specifies the execution order for data
-    extracts and analyses and the outputs to be released.
+    [*project
+    pipeline*](https://docs.opensafely.org/actions-pipelines/), which
+    specifies the execution order for data extracts and analyses and the
+    outputs to be released.
 6.  **Execute the analysis on the real data** via the [job
     server](https://jobs.opensafely.org). This will generate outputs on
     the secure server.
@@ -138,48 +144,48 @@ many patients are registered at a TPP practice within each STP
 
 Go to the [research template
 repository](https://github.com/opensafely/research-template) and click
-`Use this template`. Follow this instructions
-[here](https://docs.opensafely.org/en/latest/project_setup/).
+`Use this template`. Follow the instructions in the [Getting Started
+guide](https://docs.opensafely.org/getting-started/).
 
 ### Create a Study Definition
 
-Your newly-created repo will contain a template the study definition.
-Edit this to suit your needs. You can also view or clone [the repo for
-these demo materials](https://github.com/opensafely/os-demo-research)
-where the code is already written and tested.
+Your newly-created repo will contain a template study definition. Edit
+this to suit your needs. You can also view or clone [the repo for these
+demo materials](https://github.com/opensafely/os-demo-research) where
+the code is already written and tested.
 
-In this example, it’s a very simple — the entire file, called
+In this example, it’s very simple — the entire file, called
 [`study_definition_1_stppop.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop.py),
 looks like this:
 
 ``` python
-## LIBRARIES
+# LIBRARIES
 
 # cohort extractor
-from cohortextractor import (StudyDefinition, patients)
+from cohortextractor import StudyDefinition, patients
 
 # set the index date
 index_date = "2020-01-01"
 
-## STUDY POPULATION
+# STUDY POPULATION
 
 study = StudyDefinition(
-
-    default_expectations = {
-        "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
+    default_expectations={
+        "date": {
+            "earliest": index_date,
+            "latest": "today",
+        },  # date range for simulated dates
         "rate": "uniform",
-        "incidence": 1
+        "incidence": 1,
     },
-    
     # This line defines the study population
-    population = patients.registered_as_of(index_date),
-
+    population=patients.registered_as_of(index_date),
     # this line defines the stp variable we want to extract
-    stp = patients.registered_practice_as_of(
+    stp=patients.registered_practice_as_of(
         index_date,
         returning="stp_code",
         return_expectations={
-            "category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}},
+            "category": {"ratios": {"STP1": 0.3, "STP2": 0.2, "STP3": 0.5}},
         },
     ),
 )
@@ -188,7 +194,7 @@ study = StudyDefinition(
 Let’s break it down:
 
 ``` python
-from cohortextractor import (StudyDefinition, patients)
+from cohortextractor import StudyDefinition, patients
 ```
 
 This imports the required functions from the OpenSAFELY
@@ -204,7 +210,7 @@ We then use the `StudyDefinition()` function to define the cohort
 population and the variables we want to extract.
 
 ``` python
-default_expectations = {
+default_expectations={
     "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
     "rate": "uniform",
     "incidence": 1
@@ -214,45 +220,49 @@ default_expectations = {
 This defines the default expectations which are used to generate dummy
 data. This just says that we expect date variables to be uniformly
 distributed between the index date and today’s date. For this study
-we’re not producing any dates.
+we’re not producing any dates. An overview of all the options available
+for dummy data can be found [in the
+documentation](https://docs.opensafely.org/en/latest/study-def/#all-options)
 
 ``` python
-population = patients.registered_as_of(index_date)
+population=patients.registered_as_of(index_date)
 ```
 
 This says that we want to extract information only for patients who were
-registered at a practice on the 1 January 2020. There will be one row
-for each of these patients in the extracted dataset. Note that
-`population` is a reserved variable name for `StudyDefinition` which
-specifies the study population — we don’t have to do any additional
+registered at a practice on 1 January 2020. There will be one row for
+each of these patients in the extracted dataset. Note that `population`
+is a reserved variable name for `StudyDefinition` which specifies the
+study population — we don’t have to do any additional
 filtering/subsetting on this variable.
 
 ``` python
-stp = patients.registered_practice_as_of(
+stp=patients.registered_practice_as_of(
   index_date,
   returning="stp_code",
   return_expectations={
     "incidence": 0.99,
-    "category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}},
+    "category": {"ratios": {"STP1": 0.3, "STP2": 0.2, "STP3": 0.5}},
   },
 )
 ```
 
 This says we want to extract the STP for each patient (or more strictly,
-the STP of each patients’ practice). Here we also use the
+the STP of each patient’s practice). Here we also use the
 `returning_expectations` argument, which specifies how the `stp`
-variable will be distributed in the dummy data. The `"incidence": 0.99"`
+variable will be distributed in the dummy data. The `"incidence": 0.99`
 line says that we expect an STP code to be available for 99% of
 patients. The
 `"category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}}`
-says that the STP dummy variable will have values `STP1`, `STP2`, and
-`STP3` that are randomly generated in proportion `0.3`, `0.2`, and `0.5`
-respectively.
+line says that the STP dummy variable will have values `STP1`, `STP2`,
+and `STP3` that are randomly generated in proportion `0.3`, `0.2`, and
+`0.5` respectively.
 
-This study definition uses two in-built variable functions in
-OpenSAFELY’s `patients` library, `patients.registered_as_of()` and
-`patients._practice_as_of()`. There are many more such functions, like
-`patients.age()`, `patients.with_these_clinical_events()`, and
+This study definition uses two in-built variable functions in the
+OpenSAFELY `cohortextractor`’s `patients` module,
+`patients.registered_as_of()` and
+`patients.registered_practice_as_of()`. There are many more such
+functions, like `patients.age()`,
+`patients.with_these_clinical_events()`, and
 `patients.admitted_to_icu()`, which are listed in [OpenSAFELY’s
 documentation](https://docs.opensafely.org/en/latest/study-def-variables/).
 
@@ -273,9 +283,11 @@ for an example of this.
 Now that we’ve defined the study cohort in the
 `study_definition_1_stppop.py` python script, we can generate a dummy
 dataset. Assuming you have the correct technical set-up on your local
-machine, this involves two steps: \* defining the cohort generation
-action in the `project.yaml` file, and \* running that action using the
-`opensafely` command line module.
+machine (or you are using Gitpod), this involves two steps:
+
+-   defining the cohort generation action in the `project.yaml` file,
+    and
+-   running that action using the `opensafely` command line module.
 
 The template repository provides a working `project.yaml` file to get
 started, or you can use the `project.yaml` available in [the repo for
@@ -322,10 +334,9 @@ we have two actions:
 -   `plot_stppop` is the action that runs the R script (defined below).
     The `run` section tells it which script to run. The `needs` section
     says that this action cannot be run without having first run the
-    `geenrate_cohort_stppop` action. The `outputs` sections declares
-    that the expected outputs (a log file for debugging, and the two
-    plots) are `moderately_sensitive` and should be considered for
-    release after disclosivity checks.
+    `generate_cohort_stppop` action. The `outputs` sections declares
+    that the expected outputs (a plot) is `moderately_sensitive` and
+    should be considered for release after disclosivity checks.
 
 To run the first action, open a command line terminal that can find the
 `opensafely` module, and run
@@ -339,6 +350,10 @@ folder with `10000` rows.
 
 It will also create log files in the `metadata/` folder, for debugging.
 Security-wise, this log file is treated as `moderately_sensitive`.
+
+Note that the population argument is not encompassed in the dummy data,
+as [explained in the
+documentation](https://docs.opensafely.org/en/latest/study-def/#dummy-data-versus-real-data).
 
 ### Develop analysis scripts
 
@@ -357,14 +372,13 @@ library('tidyverse')
 
 ## import data
 df_input <- read_csv(
-  here::here("output", "cohorts", "input_1_stppop.csv"), 
+  here::here("output", "cohorts", "input_1_stppop.csv"),
   col_types = cols(
     patient_id = col_integer(),
     stp = col_character()
   )
 )
 
-# count STP for each registered patient
 df_stppop = df_input %>% count(stp, name='registered')
 ```
 
@@ -392,10 +406,24 @@ plot_stppop_bar <- df_stppop %>%
     plot.title.position = "plot",
     plot.caption.position =  "plot"
   )
+
 plot_stppop_bar
 ```
 
 ![](Rdemo_files/figure-gfm/stppop.bar-1.png)<!-- -->
+
+To save the chart to the output folder, add the following to the end of
+the file:
+
+``` r
+ggsave(
+  plot= plot_stppop_bar,
+  filename="plot_stppop_bar.png", path=here::here("output", "plots"),
+  units = "cm",
+  height = 15,
+  width = 15
+)
+```
 
 To run this script, run the `plot_stppop` action
 
@@ -409,35 +437,36 @@ run the analysis for real via the OpenSAFELY Job Server.
 ### Run the analysis scripts on the real data
 
 To run one or more actions defined in the `project.yaml` against real
-data, go to the `Job Server` at `http://jobs.opensafely.org/`. Here you
-can see (even without a login) all the ongoing projects within
-OpenSAFELY, and the specific jobs that have been run on the server. Note
-however that **to run analyses inside the OpenSAFELY secure environment,
-you need to be an approved user.**
+data, go to the `Job Server` at
+[jobs.opensafely.org](http://jobs.opensafely.org/). Here you can see
+(even without a login) all the ongoing projects within OpenSAFELY, and
+the specific jobs that have been run on the server. Note however that
+**to run analyses inside the OpenSAFELY secure environment, you need to
+be an approved user.**
 
 Full details on submitting jobs can be found on the [OpenSAFELY
-documentation
-pages](https://docs.opensafely.org/en/latest/pipelines/#running-your-code-on-the-server).
-Following these instructions will create the required outputs on the
-server, which can be reviewed on the server and released via github if
-they are deemed non-disclosive (there are detailed reviewing guidelines
-for approved researchers).
+documentation pages](https://docs.opensafely.org/job-server/). Following
+these instructions will create the required outputs on the server, which
+can be reviewed on the server and released via github if they are deemed
+non-disclosive (there are detailed reviewing guidelines for approved
+researchers).
 
 ### Check the outputs for disclosivity and release the outputs
 
-This is a manual step that must be carried out entirely in the server.
-[Instructions for this process are available for those with the
-appropriate
-permissions](https://docs.opensafely.org/en/latest/releasing-files/).
-Essentially, the step ensures that the outputs do not contain any
-potentially disclosive information due to small patient counts.
+This is a manual step that must be carried out entirely in the serve.
+[Instructions for this process are
+available](https://docs.opensafely.org/en/latest/releasing-files/) for
+individuals with appropriate permissions.. Essentially, the step ensures
+that the outputs do not contain any potentially disclosive information
+due to small patient counts.
 
 Once results have been checked they can be released via GitHub. This
 step must also occur in the server. The released outputs are put in the
 [`/released-output`](https://github.com/opensafely/os-demo-research/tree/master/released-ouput)
 folder.
 
-In this example, the bar chart looks like this:
+In this example, the bar chart looks like this after running on real
+data:
 
 [<img src="../released-ouput/plots/plot_stppop_bar.png" title="registration count by STP" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar.png)
 
@@ -446,6 +475,10 @@ Here we’re just linking to the released `.png` files in the repo
 underlying STP count data and developed an analysis script directly on
 this dataset, provided it is non-disclosive. However, typically only the
 most high-level aggregated datasets are suitable for public release.
+
+**Note: if you’re working through this walkthough on Gitpod, you may
+need to switch to a native environment to run the more complex examples
+that follow**
 
 We could also create something more sophisticated like a map, and
 include full STP names instead of codes. This requires a shape file, and
@@ -477,28 +510,18 @@ The study definition for this task is available at
 and can be viewed by clicking `code` to the right.
 
 ``` python
-## LIBRARIES
+# LIBRARIES
 
 # cohort extractor
-from cohortextractor import (
-    StudyDefinition,
-    Measure,
-    patients,
-    codelist_from_csv,
-    codelist,
-    filter_codes_by_category,
-    combine_codelists
-)
+from cohortextractor import StudyDefinition, codelist_from_csv, patients
 
-## CODELISTS
+# CODELISTS
 # All codelist are held within the codelist/ folder.
 codes_ICD10_covid = codelist_from_csv(
-    "codelists/opensafely-covid-identification.csv", 
-    system = "icd10", 
-    column = "icd10_code"
+    "codelists/opensafely-covid-identification.csv", system="icd10", column="icd10_code"
 )
 
-## STUDY POPULATION
+# STUDY POPULATION
 # Defines both the study population and points to the important covariates
 
 index_date = "2020-01-01"
@@ -506,81 +529,70 @@ end_date = "2020-09-30"
 
 
 study = StudyDefinition(
-        # Configure the expectations framework
+    # Configure the expectations framework
     default_expectations={
         "date": {"earliest": index_date, "latest": end_date},
         "rate": "uniform",
     },
-
-    index_date = index_date,
-
+    index_date=index_date,
     # This line defines the study population
-    population = patients.satisfying(
+    population=patients.satisfying(
         """
         (sex = 'F' OR sex = 'M') AND
         (age >= 18 AND age < 120) AND
         (NOT died) AND
         (registered)
         """,
-        
-        registered = patients.registered_as_of(index_date),
-        died = patients.died_from_any_cause(
+        registered=patients.registered_as_of(index_date),
+        died=patients.died_from_any_cause(
             on_or_before=index_date,
             returning="binary_flag",
         ),
     ),
-
-    age = patients.age_as_of(
+    age=patients.age_as_of(
         index_date,
         return_expectations={
             "int": {"distribution": "population_ages"},
-            "incidence": 1
+            "incidence": 1,
         },
     ),
-
-    sex = patients.sex(
+    sex=patients.sex(
         return_expectations={
             "category": {"ratios": {"M": 0.49, "F": 0.51}},
-            "incidence": 1
+            "incidence": 1,
         }
     ),
-    
-    date_death = patients.died_from_any_cause(
-        between = [index_date, end_date],
-        returning = "date_of_death",
-        date_format = "YYYY-MM-DD",
-        return_expectations = {
+    date_death=patients.died_from_any_cause(
+        between=[index_date, end_date],
+        returning="date_of_death",
+        date_format="YYYY-MM-DD",
+        return_expectations={
             "incidence": 0.2,
         },
     ),
-
-    death_category = patients.categorised_as(
+    death_category=patients.categorised_as(
         {
             "covid-death": "died_covid",
             "non-covid-death": "(NOT died_covid) AND died_any",
-            "alive" : "DEFAULT"
+            "alive": "DEFAULT",
         },
-
-        died_covid = patients.with_these_codes_on_death_certificate(
+        died_covid=patients.with_these_codes_on_death_certificate(
             codes_ICD10_covid,
-            returning = "binary_flag",
-            match_only_underlying_cause = False,
-            between = [index_date, end_date],
+            returning="binary_flag",
+            match_only_underlying_cause=False,
+            between=[index_date, end_date],
         ),
-
-        died_any = patients.died_from_any_cause(
-            between = [index_date, end_date],
-            returning = "binary_flag",
+        died_any=patients.died_from_any_cause(
+            between=[index_date, end_date],
+            returning="binary_flag",
         ),
-
-        return_expectations = {
-            "category": {"ratios": {"alive": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}}, 
-            "incidence": 1
+        return_expectations={
+            "category": {
+                "ratios": {"alive": 0.8, "covid-death": 0.1, "non-covid-death": 0.1}
+            },
+            "incidence": 1,
         },
     ),
-
-    
-
 )
 ```
 
@@ -589,8 +601,9 @@ import the codelist for identifying covid-related deaths. This uses data
 from death certificates, which are coded using ICD-10 codes. The covid
 codes in this system are `U071` and `U072`, and have been collected in a
 codelist at
-[codelists.opensafely.org](https://codelists.opensafely.org/codelist/opensafely/covid-identification/2020-06-03).
-To import the codelists, put the codelist url in the
+<https://www.opencodelists.org/codelist/opensafely/covid-identification/2020-06-03/>.
+To import the codelists, put the codelist path
+(opensafely/covid-identification/2020-06-03) in the
 `codelists/codelists.txt` file in the repo, then run the following
 command:
 
@@ -610,12 +623,51 @@ codes_ICD10_covid = codelist_from_csv(
 ```
 
 Then as before, we define the cohort population and the variables we
-want to extract within a study definition, define a `cohortextractor`
-action in the `project.yaml` file, and run using `opensafely run`. The
-variables we extract this time are `age`, `sex`, `date_death`, and
-`death_category`. These use some new variable functions and some more
-expectation definitions, whose details can be found in the documentation
-[here](https://docs.opensafely.org/en/latest/study_def_intro/).
+want to extract within a study definition. Here we utilise
+`satisfying()` to define a population who meet a range of criteria.
+
+``` python
+    ...
+    population = patients.satisfying(
+        """
+        (sex = 'F' OR sex = 'M') AND
+        (age >= 18 AND age < 120) AND
+        (NOT died) AND
+        (registered)
+        """,
+        
+        registered = patients.registered_as_of(index_date),
+        died = patients.died_from_any_cause(
+            on_or_before=index_date,
+            returning="binary_flag",
+        ),
+    ),
+```
+
+The first argument states the series of conditions patients must satisfy
+to be included. After this, the variables in the condition statement can
+be defined. Note that these variables can either be defined under this
+statement (as with `registered` and `died`) or elsewhere in the study
+definition.
+
+Here `registered` is used to select patients registered as of the index
+date and `died` is used to select any patients that died on or before
+the index date. As for many in-built variable functions,
+`patients.died_from_any_cause()` has multiple options for how the
+variable should returned, defined by `returning`. Here we are interested
+in whether the patient has died or not so use the option
+`"binary_flag"`.
+
+As before, we then define a `cohortextractor` action in the
+`project.yaml` file, and run using `opensafely run`. The other variables
+extracted are `sex`, `date_death`, and `death_category`. These use some
+new variable functions and some more expectation definitions, whose
+details can be found in the Study Definition [variable
+reference](https://docs.opensafely.org/en/latest/study-def-variables/).
+
+If you are defining a population satisfying a list of criteria, as here,
+you will likely wish to produce [an inclusion/exclusion
+flowchart](https://docs.opensafely.org/en/latest/study-def-flowcharts/).
 
 ### Results
 
@@ -632,17 +684,19 @@ final graph looks like this:
 Here you can see the familiar covid mortality bump during the first wave
 of the pandemic. There is also a bump in non-covid deaths, suggesting
 that identification of covid-related deaths may not be 100% sensitive,
-or that health services struggled during this period, or that people we
-not seeking the care they needed.
+or that health services struggled during this period, or that people
+were not seeking the care they needed.
 
 ## Example 3 — Primary care activity throughout the pandemic.
 
 In our final example, we introduce the Measures framework. This enables
 the extraction of multiple study cohorts each covering different time
-periods, and calculates a set of statistics for each period. We’ll look
-at the frequency of cholesterol and INR (International Normalised Ratio,
-which measures how long it takes for blood to clot) measurements
-recorded in the Primary Care record, by practice and by STP.
+periods, and calculates a set of statistics for each period.
+
+We’ll look at the frequency of cholesterol and INR (International
+Normalised Ratio, which measures how long it takes for blood to clot)
+measurements recorded in the Primary Care record, by practice and by
+STP.
 
 ### Study Definition
 
@@ -651,98 +705,77 @@ The entire study definition is available at
 and can be viewed by clicking `code` to the right.
 
 ``` python
-## LIBRARIES
+# LIBRARIES
 
 # cohort extractor
-from cohortextractor import (
-    StudyDefinition,
-    Measure,
-    patients,
-    codelist_from_csv,
-    codelist,
-    filter_codes_by_category,
-    combine_codelists
-)
-
-## CODELISTS
-# All codelist are held within the codelist/ folder.
-codes_cholesterol = codelist_from_csv(
-    "codelists-local/cholesterol-measurement.csv", 
-    system = "ctv3", 
-    column = "id"
-)
-
-codes_inr = codelist_from_csv(
-    "codelists-local/international-normalised-ratio-measurement.csv", 
-    system = "ctv3", 
-    column = "id"
-)
-
-
+from cohortextractor import Measure, StudyDefinition, codelist_from_csv, patients
 # dictionary of STP codes (for dummy data)
 from dictionaries import dict_stp
 
+# CODELISTS
+# All codelist are held within the codelist/ folder.
+codes_cholesterol = codelist_from_csv(
+    "codelists-local/cholesterol-measurement.csv", system="ctv3", column="id"
+)
 
-## STUDY POPULATION
+codes_inr = codelist_from_csv(
+    "codelists-local/international-normalised-ratio-measurement.csv",
+    system="ctv3",
+    column="id",
+)
 
+
+# STUDY POPULATION
 index_date = "2020-01-01"
 
 study = StudyDefinition(
-        # Configure the expectations framework
+    # Configure the expectations framework
     default_expectations={
         "date": {"earliest": index_date, "latest": "today"},
         "rate": "uniform",
-        "incidence": 1
+        "incidence": 1,
     },
-
-    index_date = index_date,
-
+    index_date=index_date,
     # This line defines the study population
-    population = patients.satisfying(
+    population=patients.satisfying(
         """
         (age >= 18 AND age < 120) AND
         (NOT died) AND
         (registered)
         """,
-        
-        died = patients.died_from_any_cause(
-            on_or_before=index_date,
-            returning="binary_flag"
+        died=patients.died_from_any_cause(
+            on_or_before=index_date, returning="binary_flag"
         ),
-        registered = patients.registered_as_of(index_date),
+        registered=patients.registered_as_of(index_date),
         age=patients.age_as_of(index_date),
     ),
-
-    ### geographic/administrative groups
-    practice = patients.registered_practice_as_of(
-         index_date,
-         returning = "pseudo_id",
-         return_expectations={
-             "int": {"distribution": "normal", "mean": 100, "stddev": 20}
-         },
+    # geographic/administrative groups
+    practice=patients.registered_practice_as_of(
+        index_date,
+        returning="pseudo_id",
+        return_expectations={
+            "int": {"distribution": "normal", "mean": 100, "stddev": 20}
+        },
     ),
-
-    stp = patients.registered_practice_as_of(
+    stp=patients.registered_practice_as_of(
         index_date,
         returning="stp_code",
         return_expectations={
             "category": {"ratios": dict_stp},
         },
     ),
-
-    cholesterol = patients.with_these_clinical_events(
+    cholesterol=patients.with_these_clinical_events(
         codes_cholesterol,
-        returning = "number_of_episodes",
-        between = ["index_date", "index_date + 1 month"],
+        returning="number_of_episodes",
+        between=["index_date", "index_date + 1 month"],
         return_expectations={
             "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
         },
     ),
-
-    inr = patients.with_these_clinical_events(
+    inr=patients.with_these_clinical_events(
         codes_inr,
-        returning = "number_of_episodes",
-        between = ["index_date", "index_date + 1 month"],
+        returning="number_of_episodes",
+        between=["index_date", "index_date + 1 month"],
         return_expectations={
             "int": {"distribution": "normal", "mean": 3, "stddev": 0.5}
         },
@@ -755,78 +788,77 @@ measures = [
         id="cholesterol_practice",
         numerator="cholesterol",
         denominator="population",
-        group_by="practice"
+        group_by="practice",
     ),
     Measure(
         id="cholesterol_stp",
         numerator="cholesterol",
         denominator="population",
-        group_by="stp"
+        group_by="stp",
     ),
     Measure(
         id="inr_practice",
         numerator="inr",
         denominator="population",
-        group_by="practice"
+        group_by="practice",
     ),
-    Measure(
-        id="inr_stp",
-        numerator="inr",
-        denominator="population",
-        group_by="stp"
-    ),
+    Measure(id="inr_stp", numerator="inr", denominator="population", group_by="stp"),
 ]
 ```
 
 We’ll pick out some key parts:
 
 ``` python
-population = patients.satisfying(
+...
+population=patients.satisfying(
     """
     (age >= 18 AND age < 120) AND
     (NOT died) AND
     (registered)
     """,
-    died = patients.died_from_any_cause(
-      on_or_before = index_date,
-      returning = "binary_flag"
+    died=patients.died_from_any_cause(
+      on_or_before=index_date,
+      returning=binary_flag"
     ),
-    registered = patients.registered_as_of(index_date),
-    age = patients.age_as_of(index_date),
+    registered=patients.registered_as_of(index_date),
+    age=patients.age_as_of(index_date),
 )
+...
 ```
 
 The population declaration says that for each period, we want the set of
 adult patients who are both alive and registered at the index date.
 
 ``` python
-cholesterol = patients.with_these_clinical_events(
+...
+cholesterol=patients.with_these_clinical_events(
     codes_cholesterol,
-    returning = "number_of_episodes",
-    between = ["index_date", "index_date + 1 month"],
+    returning="number_of_episodes",
+    between=["index_date", "index_date + 1 month"],
     return_expectations={
         "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
     },
 ),
 
-inr = patients.with_these_clinical_events(
+inr=patients.with_these_clinical_events(
     codes_inr,
-    returning = "number_of_episodes",
-    between = ["index_date", "index_date + 1 month"],
+    returning="number_of_episodes",
+    between=["index_date", "index_date + 1 month"],
     return_expectations={
         "int": {"distribution": "normal", "mean": 3, "stddev": 0.5}
     },
 ),
+...
 ```
 
 Then we want to extract the number of cholesterol- or INR-measurement
-“episodes” recorded during the month beginning the index date. The
+“episodes” recorded during the month starting from the index date. The
 `codes_cholesterol` and the `codes_inr` codelists are defined similarly
 to the `codes_ICD10_covid` in example 2. Using expectations, we say the
 dummy values for these variables will be a low-valued integer.
 
 ``` python
-measures = [
+measures=[
     Measure(
         id="cholesterol_practice",
         numerator="cholesterol",
@@ -856,15 +888,15 @@ measures = [
 
 Finally, we define the measures that we want to calculate. Here we want
 four measures, one for each combination of cholesterol/inr and
-practice/STP. For more details on Measures, see the documentation
-[here](https://docs.opensafely.org/en/latest/measures/).
+practice/STP. For more details on Measures, see the
+[documentation](https://docs.opensafely.org/en/latest/measures/).
 
 ### Generating measures
 
 As before, we generate dummy data by defining a
 `cohortextractor generate_cohort` action in the `project.yaml` and then
 running that action using `opensafely run`. For measures, we include an
-addition `--index-date-range` option so that it extracts a new cohort
+additional `--index-date-range` option so that it extracts a new cohort
 for each date specified, as follows:
 
 ``` bash
