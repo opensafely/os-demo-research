@@ -17,18 +17,18 @@ knitr::opts_chunk$set(echo = TRUE, python.reticulate = FALSE)
 
 ## Introduction
 
-OpenSAFELY is a secure analytics platform for electronic health records in the NHS, created to deliver urgent research during the global COVID-19 emergency. It is now successfully delivering analyses across more than 24 million patients’ full pseudonymised primary care NHS records, with more to follow shortly.
+OpenSAFELY is a secure analytics platform for electronic health records in the NHS, created to deliver urgent research during the global COVID-19 emergency. It is now successfully delivering analyses across more than 58 million patients’ full pseudonymised primary care NHS records.
 
 All our analytic software is open for security review, scientific review, and re-use. OpenSAFELY uses a new model for enhanced security and timely access to data: we don’t transport large volumes of potentially disclosive pseudonymised patient data outside of the secure environments managed by the electronic health record software company; instead, trusted analysts can run large scale computation across near real-time pseudonymised patient records inside the data centre of the electronic health records software company. 
 
-This document is intended as a short walkthrough of the OpenSAFELY platform. Please visit [docs.opensafely.org](https://docs.opensafely.org/en/latest/) for more comprehensive documentation, and [opensafely.org/](https://opensafely.org/) for any other info.
+This document is intended as a short walkthrough of the OpenSAFELY platform. Please visit [docs.opensafely.org](https://docs.opensafely.org/en/latest/) for more comprehensive documentation, and [opensafely.org](https://opensafely.org/) for any other info.
 
 
 The examples in this document are all available in the [os-demo-research](https://github.com/opensafely/os-demo-research) github repository.
 
 ### Technical pre-requisites
 
-OpenSAFELY maintains extremely high standards for data privacy, whilst ensuring complete computational and analytical transparency. As such there are some technical pre-requisites that users must satisfy to use the platform. These include installing and using git and python, though typically only a narrow set of actions are required and guide-rails are provided. These details can be found in [the documentation pages](https://docs.opensafely.org/en/latest/min_req/). The walkthrough assumes that the technical set-up has been completed.
+OpenSAFELY maintains extremely high standards for data privacy, whilst ensuring complete computational and analytical transparency. As such there are some technical pre-requisites that users must satisfy to use the platform. These include installing and using git and python, though typically only a narrow set of actions are required and guide-rails are provided. These details can be found in [the documentation pages](https://docs.opensafely.org/getting-started/), which also provides an alternative option to installing requirements locally, using the [Gitpod](https://gitpod.io) service. It is recommended that you follow the [Getting Started guide](https://docs.opensafely.org/getting-started/) for an introduction to the technical requirements and basic workflow before working through this walkthrough.  The walkthrough assumes that the technical set-up has been completed.
 
 
 ### Key concepts
@@ -39,29 +39,27 @@ OpenSAFELY maintains extremely high standards for data privacy, whilst ensuring 
    * A real dataset created from the OpenSAFELY database, used for the real analysis. Real datasets never leave the secure server &mdash; only summary data and other outputs that are derived from them can be released, after thorough disclosivity checks.
 * A **Codelist** is a collection of clinical codes that define a particular condition, event or diagnosis.
 * The **project pipeline** defines dependencies within the project's analytic code. For example `make_chart.R` depends on `process_data.R`, which depends on the study dataset having been extracted. This reduces redundancies by only running scripts that need to be run.
-* The *`opensafely` command-line interface* is used to run actions defined in the project pipelines, as well as other useful tasks like importing codelists.
+* The *[`opensafely` command-line interface])(https://github.com/opensafely-core/opensafely-cli)* is used to run actions defined in the project pipelines, as well as other useful tasks like importing codelists.
 * The **job server** runs the actions defined in the project pipeline using real data. You can see it at [jobs.opensafely.org](https://jobs.opensafely.org).
 
 
 ### Workflow
 
-For researchers using the platform, the OpenSAFELY workflow for a single study is typically as follows:
-
-The workflow for a single study can typically be broken down into the following steps:
+For researchers using the platform, the OpenSAFELY workflow for a single study can typically be broken down into the following steps:
 
 1.  **Create a git repository** from the template repository provided and clone it on your local machine.
 This repo will contain all the code relating to your project and a history of its development over time.
 2.  **Write a study definition** to specify what data you want to extract from the database:
     -   specify the patient population (dataset rows) and variables (dataset columns)
     -   specify the expected distributions of these variables for use in dummy data
-    -   specify the codelists required by the study definition, hosted by [codelists.opensafely.org](https://codelists.opensafely.org), and import them to the repo.
-3.  **Generate dummy data** based on the study sefinition, for writing and testing code.
+    -   specify the codelists required by the study definition, hosted by [opencodelists.org](https://www.opencodelists.org/), and import them to the repo.
+3.  **Generate dummy data** based on the study definition, for writing and testing code.
 4.  **Develop analysis scripts** using the dummy data in R, Stata, or Python. This will include:
     -   importing and processing the dataset(s) created by the cohort extractor
     -   importing any other external files needed for analysis
     -   generating analysis outputs like tables and figures
     -   generating log files to debug the scripts when they run on the real data.
-5.  **Test the code** by running the analysis steps specified in the _project pipeline_, which specifies the execution order for data extracts and analyses and the outputs to be released.
+5.  **Test the code** by running the analysis steps specified in the [_project pipeline_](https://docs.opensafely.org/actions-pipelines/), which specifies the execution order for data extracts and analyses and the outputs to be released.
 6.  **Execute the analysis on the real data** via the [job server](https://jobs.opensafely.org). This will generate outputs on the secure server.
 7.  **Check the output for disclosivity** within the server, and redact if necessary.
 8.  **Release the outputs** via GitHub.
@@ -86,14 +84,14 @@ This example introduces study definitions, expectations and dummy data, and proj
 
 ### Create a git repository
 
-Go to the [research template repository](https://github.com/opensafely/research-template) and click `Use this template`. Follow this instructions [here](https://docs.opensafely.org/en/latest/project_setup/).
+Go to the [research template repository](https://github.com/opensafely/research-template) and click `Use this template`. Follow the instructions in the [Getting Started guide](https://docs.opensafely.org/getting-started/).
 
 
 ### Create a Study Definition
-Your newly-created repo will contain a template the study definition. Edit this to suit your needs. 
+Your newly-created repo will contain a template study definition. Edit this to suit your needs.
 You can also view or clone [the repo for these demo materials](https://github.com/opensafely/os-demo-research) where the code is already written and tested.
 
-In this example, it's a very simple &mdash; the entire file, called [`study_definition_1_stppop.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop.py), looks like this:
+In this example, it's very simple &mdash; the entire file, called [`study_definition_1_stppop.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop.py), looks like this:
 
 ```{python, eval=FALSE, code=readLines("../analysis/study_definition_1_stppop.py")}
 ```
@@ -102,7 +100,7 @@ In this example, it's a very simple &mdash; the entire file, called [`study_defi
 Let's break it down:
 
 ```{python,  eval=FALSE}
-from cohortextractor import (StudyDefinition, patients)
+from cohortextractor import StudyDefinition, patients
 ```
 
 This imports the required functions from the OpenSAFELY `cohortextractor` library, that you will have previously installed.
@@ -115,7 +113,7 @@ This defines the registration date that we're interested in.
 We then use the `StudyDefinition()` function to define the cohort population and the variables we want to extract. 
 
 ```{python,  eval=FALSE}
-default_expectations = {
+default_expectations={
     "date": {"earliest": index_date, "latest": "today"}, # date range for simulated dates
     "rate": "uniform",
     "incidence": 1
@@ -124,28 +122,28 @@ default_expectations = {
 This defines the default expectations which are used to generate dummy data. This just says that we expect date variables to be uniformly distributed between the index date and today's date. For this study we're not producing any dates. An overview of all the options available for dummy data can be found [in the documentation](https://docs.opensafely.org/en/latest/study-def/#all-options)
 
 ```{python,  eval=FALSE}
-population = patients.registered_as_of(index_date)
+population=patients.registered_as_of(index_date)
 ```
-This says that we want to extract information only for patients who were registered at a practice on the 1 January 2020. There will be one row for each of these patients in the extracted dataset. Note that `population` is a reserved variable name for `StudyDefinition` which specifies the study population &mdash; we don't have to do any additional filtering/subsetting on this variable. 
+This says that we want to extract information only for patients who were registered at a practice on 1 January 2020. There will be one row for each of these patients in the extracted dataset. Note that `population` is a reserved variable name for `StudyDefinition` which specifies the study population &mdash; we don't have to do any additional filtering/subsetting on this variable.
 
 ```{python,  eval=FALSE}
-stp = patients.registered_practice_as_of(
+stp=patients.registered_practice_as_of(
   index_date,
   returning="stp_code",
   return_expectations={
     "incidence": 0.99,
-    "category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}},
+    "category": {"ratios": {"STP1": 0.3, "STP2": 0.2, "STP3": 0.5}},
   },
 )
 ```
 
-This says we want to extract the STP for each patient (or more strictly, the STP of each patients' practice). 
+This says we want to extract the STP for each patient (or more strictly, the STP of each patient's practice).
 Here we also use the `returning_expectations` argument, which specifies how the `stp` variable will be distributed in the dummy data. 
-The `"incidence": 0.99"` line says that we expect an STP code to be available for 99\% of patients. 
-The `"category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}}` says that the STP dummy variable will have values `STP1`, `STP2`, and `STP3` that are randomly generated in proportion `0.3`, `0.2`, and `0.5` respectively. 
+The `"incidence": 0.99` line says that we expect an STP code to be available for 99\% of patients.
+The `"category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}}` line says that the STP dummy variable will have values `STP1`, `STP2`, and `STP3` that are randomly generated in proportion `0.3`, `0.2`, and `0.5` respectively.
 
 
-This study definition uses two in-built variable functions in OpenSAFELY's `patients` library, `patients.registered_as_of()` and `patients._practice_as_of()`. 
+This study definition uses two in-built variable functions in the OpenSAFELY `cohortextractor`'s `patients` module, `patients.registered_as_of()` and `patients.registered_practice_as_of()`.
 There are many more such functions, like `patients.age()`, `patients.with_these_clinical_events()`, and `patients.admitted_to_icu()`, which are listed in [OpenSAFELY's documentation](https://docs.opensafely.org/en/latest/study-def-variables/). 
 
 Note that more realistic STP dummy values are possible.
@@ -158,7 +156,8 @@ See the [`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-de
 ### Generate dummy data
 
 Now that we've defined the study cohort in the `study_definition_1_stppop.py` python script, we can generate a dummy dataset. 
-Assuming you have the correct technical set-up on your local machine, this involves two steps: 
+Assuming you have the correct technical set-up on your local machine (or you are using Gitpod), this involves two steps:
+
 * defining the cohort generation action in the `project.yaml` file, and 
 * running that action using the `opensafely` command line module.
 
@@ -195,7 +194,7 @@ The file begins with some housekeeping that specifies which version to use and t
 The main part of the yaml file is the `actions` section. In this example we have two actions:
 
 * `generate_cohort_stppop` is the action to extract the dataset from the database. The `run` section gives the extraction command (`generate_cohort`), which study definition to use (`--study-definition study_definition_1_stppop`) and where to put the output (`--output-dir = output/cohorts`). The `outputs` section declares that the expected output is `highly_sensitive` and shouldn't be considered for release.
-* `plot_stppop` is the action that runs the R script (defined below). The `run` section tells it which script to run. The `needs` section says that this action cannot be run without having first run the `generate_cohort_stppop` action. The `outputs` sections declares that the expected outputs (a log file for debugging, and the two plots) are `moderately_sensitive` and should be considered for release after disclosivity checks.
+* `plot_stppop` is the action that runs the R script (defined below). The `run` section tells it which script to run. The `needs` section says that this action cannot be run without having first run the `generate_cohort_stppop` action. The `outputs` sections declares that the expected outputs (a plot) is `moderately_sensitive` and should be considered for release after disclosivity checks.
 
 To run the first action, open a command line terminal that can find the `opensafely` module, and run
 
@@ -223,14 +222,13 @@ library('tidyverse')
 
 ## import data
 df_input <- read_csv(
-  here::here("output", "cohorts", "input_1_stppop.csv"), 
+  here::here("output", "cohorts", "input_1_stppop.csv"),
   col_types = cols(
     patient_id = col_integer(),
     stp = col_character()
   )
 )
 
-# count STP for each registered patient
 df_stppop = df_input %>% count(stp, name='registered')
 ```
 
@@ -256,7 +254,20 @@ plot_stppop_bar <- df_stppop %>%
     plot.title.position = "plot",
     plot.caption.position =  "plot"
   )
+
 plot_stppop_bar
+```
+
+To save the chart to the output folder, add the following to the end of the file:
+
+```{r,  eval=FALSE, warning = FALSE, message = FALSE}
+ggsave(
+  plot= plot_stppop_bar,
+  filename="plot_stppop_bar.png", path=here::here("output", "plots"),
+  units = "cm",
+  height = 15,
+  width = 15
+)
 ```
 
 To run this script, run the `plot_stppop` action 
@@ -270,24 +281,24 @@ Now we have a working analysis script that outputs what we want, we can run the 
 
 ### Run the analysis scripts on the real data
 
-To run one or more actions defined in the `project.yaml` against real data, go to the `Job Server` at `http://jobs.opensafely.org/`. 
+To run one or more actions defined in the `project.yaml` against real data, go to the `Job Server` at [jobs.opensafely.org](http://jobs.opensafely.org/). 
 Here you can see (even without a login) all the ongoing projects within OpenSAFELY, and the specific jobs that have been run on the server. 
 Note however that **to run analyses inside the OpenSAFELY secure environment, you need to be an approved user.**
 
-Full details on submitting jobs can be found on the [OpenSAFELY documentation pages](https://docs.opensafely.org/en/latest/pipelines/#running-your-code-on-the-server).
+Full details on submitting jobs can be found on the [OpenSAFELY documentation pages](https://docs.opensafely.org/job-server/).
 Following these instructions will create the required outputs on the server, which can be reviewed on the server and released via github if they are deemed non-disclosive (there are detailed reviewing guidelines for approved researchers). 
 
 ### Check the outputs for disclosivity and release the outputs
 
-This is a manual step that must be carried out entirely in the server. 
-[Instructions for this process are available for those with the appropriate permissions](https://docs.opensafely.org/en/latest/releasing-files/). 
+This is a manual step that must be carried out entirely in the serve. 
+[Instructions for this process are available](https://docs.opensafely.org/en/latest/releasing-files/) for individuals with appropriate permissions.. 
 Essentially, the step ensures that the outputs do not contain any potentially disclosive information due to small patient counts. 
 
 Once results have been checked they can be released via GitHub. 
 This step must also occur in the server. 
 The released outputs are put in the [`/released-output`](https://github.com/opensafely/os-demo-research/tree/master/released-ouput) folder.
 
-In this example, the bar chart looks like this:
+In this example, the bar chart looks like this after running on real data:
 
 [![](../released-ouput/plots/plot_stppop_bar.png "registration count by STP"){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar.png)
 
@@ -295,7 +306,9 @@ Here we're just linking to the released `.png` files in the repo (clicking the i
 We could have also released the underlying STP count data and developed an analysis script directly on this dataset, provided it is non-disclosive. 
 However, typically only the most high-level aggregated datasets are suitable for public release. 
 
-We could also create something more sophisticated like a map, and include full STP names instead of codes. 
+**Note: if you're working through this walkthough on Gitpod, you may need to switch to a native environment to run the more complex examples that follow.**
+
+We could also create something more sophisticated like a map, and include full STP names instead of codes.
 This requires a shape file, and to run successfully locally would also need matching dummy data. 
 See the [`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_map.py) study definition and [`analysis/1-plot-stppop_map.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/1-plot-stppop_map.R) R script to see how this would work.
 
@@ -321,8 +334,8 @@ The study definition for this task is available at [`/analysis/study_definition_
 As before, we first import libraries and dictionaries. 
 This time we also import the codelist for identifying covid-related deaths.
 This uses data from death certificates, which are coded using ICD-10 codes. 
-The covid codes in this system are `U071` and `U072`, and have been collected in a codelist at [codelists.opensafely.org](https://codelists.opensafely.org/codelist/opensafely/covid-identification/2020-06-03). 
-To import the codelists, put the codelist url in the `codelists/codelists.txt` file in the repo, then run the following command:
+The covid codes in this system are `U071` and `U072`, and have been collected in a codelist at [https://www.opencodelists.org/codelist/opensafely/covid-identification/2020-06-03/](https://www.opencodelists.org/codelist/opensafely/covid-identification/2020-06-03/). 
+To import the codelists, put the codelist path (opensafely/covid-identification/2020-06-03) in the `codelists/codelists.txt` file in the repo, then run the following command:
 
 ```bash
 opensafely codelists update
@@ -341,7 +354,8 @@ codes_ICD10_covid = codelist_from_csv(
 Then as before, we define the cohort population and the variables we want to extract within a study definition.  Here we utilise `satisfying()` to define a population who meet a range of criteria.
 
 ```{python,  eval=FALSE}
-population = patients.satisfying(
+    ...
+    population = patients.satisfying(
         """
         (sex = 'F' OR sex = 'M') AND
         (age >= 18 AND age < 120) AND
@@ -361,7 +375,7 @@ The first argument states the series of conditions patients must satisfy to be i
 
 Here `registered` is used to select patients registered as of the index date and `died` is used to select any patients that died on or before the index date. As for many in-built variable functions, `patients.died_from_any_cause()` has multiple options for how the variable should returned, defined by `returning`. Here we are interested in whether the patient has died or not so use the option `"binary_flag"`.
 
-As before, we then define a `cohortextractor` action in the `project.yaml` file, and run using `opensafely run`. The other variables extracted are `sex`, `date_death`, and `death_category`. These use some new variable functions and some more expectation definitions, whose details can be found in the documentation [here](https://docs.opensafely.org/en/latest/study-def-variables/).
+As before, we then define a `cohortextractor` action in the `project.yaml` file, and run using `opensafely run`. The other variables extracted are `sex`, `date_death`, and `death_category`. These use some new variable functions and some more expectation definitions, whose details can be found in the Study Definition [variable reference](https://docs.opensafely.org/en/latest/study-def-variables/).
 
 If you are defining a population satisfying a list of criteria, as here, you will likely wish to produce [an inclusion/exclusion flowchart](https://docs.opensafely.org/en/latest/study-def-flowcharts/).
 
@@ -381,6 +395,7 @@ There is also a bump in non-covid deaths, suggesting that identification of covi
 
 In our final example, we introduce the Measures framework. 
 This enables the extraction of multiple study cohorts each covering different time periods, and calculates a set of statistics for each period. 
+
 We'll look at the frequency of cholesterol and INR (International Normalised Ratio, which measures how long it takes for blood to clot) measurements recorded in the Primary Care record, by practice and by STP.
 
 ### Study Definition
@@ -393,48 +408,52 @@ The entire study definition is available at [`/analysis/study_definition_3_activ
 We'll pick out some key parts:
 
 ```{python, eval=FALSE}
-population = patients.satisfying(
+...
+population=patients.satisfying(
     """
     (age >= 18 AND age < 120) AND
     (NOT died) AND
     (registered)
     """,
-    died = patients.died_from_any_cause(
-      on_or_before = index_date,
-      returning = "binary_flag"
+    died=patients.died_from_any_cause(
+      on_or_before=index_date,
+      returning=binary_flag"
     ),
-    registered = patients.registered_as_of(index_date),
-    age = patients.age_as_of(index_date),
+    registered=patients.registered_as_of(index_date),
+    age=patients.age_as_of(index_date),
 )
+...
 ```
 
 The population declaration says that for each period, we want the set of adult patients who are both alive and registered at the index date.
 
 
 ```{python, eval=FALSE}
-cholesterol = patients.with_these_clinical_events(
+...
+cholesterol=patients.with_these_clinical_events(
     codes_cholesterol,
-    returning = "number_of_episodes",
-    between = ["index_date", "index_date + 1 month"],
+    returning="number_of_episodes",
+    between=["index_date", "index_date + 1 month"],
     return_expectations={
         "int": {"distribution": "normal", "mean": 2, "stddev": 0.5}
     },
 ),
 
-inr = patients.with_these_clinical_events(
+inr=patients.with_these_clinical_events(
     codes_inr,
-    returning = "number_of_episodes",
-    between = ["index_date", "index_date + 1 month"],
+    returning="number_of_episodes",
+    between=["index_date", "index_date + 1 month"],
     return_expectations={
         "int": {"distribution": "normal", "mean": 3, "stddev": 0.5}
     },
 ),
+...
 ```
-Then we want to extract the number of cholesterol- or INR-measurement "episodes" recorded during the month beginning the index date. The `codes_cholesterol` and the `codes_inr` codelists are defined similarly to the `codes_ICD10_covid` in example 2. Using expectations, we say the dummy values for these variables will be a low-valued integer.
+Then we want to extract the number of cholesterol- or INR-measurement "episodes" recorded during the month starting from the index date. The `codes_cholesterol` and the `codes_inr` codelists are defined similarly to the `codes_ICD10_covid` in example 2. Using expectations, we say the dummy values for these variables will be a low-valued integer.
 
 
 ```{python, eval=FALSE}
-measures = [
+measures=[
     Measure(
         id="cholesterol_practice",
         numerator="cholesterol",
@@ -464,12 +483,12 @@ measures = [
 
 Finally, we define the measures that we want to calculate. 
 Here we want four measures, one for each combination of cholesterol/inr and practice/STP. 
-For more details on Measures, see the documentation [here](https://docs.opensafely.org/en/latest/measures/). 
+For more details on Measures, see the [documentation](https://docs.opensafely.org/en/latest/measures/). 
 
 ### Generating measures
 
 As before, we generate dummy data by defining a `cohortextractor generate_cohort` action in the `project.yaml` and then running that action using `opensafely run`. 
-For measures, we include an addition `--index-date-range` option so that it extracts a new cohort for each date specified, as follows:
+For measures, we include an additional `--index-date-range` option so that it extracts a new cohort for each date specified, as follows:
 
 ```bash
 cohortextractor:latest generate_cohort --study-definition study_definition_3_activity --index-date-range "2020-01-01 to 2020-09-01 by month"
