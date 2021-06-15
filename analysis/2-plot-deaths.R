@@ -58,6 +58,11 @@ ggplot() +
     panel.grid.minor.x = element_blank()
   )
 
+
+# create directory where output will be saved
+dir.create(here::here("output", "plots"))
+
+# save plot
 ggsave(
   plot= plot_deaths,
   filename="plot_deaths.png", path=here::here("output", "plots"),
