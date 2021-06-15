@@ -77,6 +77,9 @@ measures_plots <- measures %>%
   )
 
 
+# create directory where output will be saved
+dir.create(here::here("output", "plots"))
+
 ## plot the charts (by variable)
 measures_plots %>%
   transmute(

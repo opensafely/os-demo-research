@@ -37,6 +37,10 @@ ggplot() +
     legend.position=c(0.1, 0.5)
   )
 
+# create directory where output will be saved
+dir.create(here::here("output", "plots"))
+
+# save plot
 ggsave(
   plot= plot_stppop_map,
   filename="plot_stppop_map.png", path=here::here("output", "plots"),
