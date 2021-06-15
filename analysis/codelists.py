@@ -1,10 +1,6 @@
-from cohortextractor import (
-    codelist,
-    codelist_from_csv,
-)
+from cohortextractor import codelist_from_csv
 
-
-## measurement codes
+# measurement codes
 
 codes_ICD10_covid = codelist_from_csv(
     "codelists/opensafely-covid-identification.csv", system="icd10", column="icd10_code"
@@ -15,5 +11,7 @@ codes_cholesterol = codelist_from_csv(
 )
 
 codes_inr = codelist_from_csv(
-    "codelists-local/international-normalised-ratio-measurement.csv", system="ctv3", column="id"
+    "codelists-local/international-normalised-ratio-measurement.csv",
+    system="ctv3",
+    column="id",
 )
