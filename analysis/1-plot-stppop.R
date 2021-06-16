@@ -36,7 +36,7 @@ plot_stppop_bar <- df_stppop %>%
   )
 
 # create directory where output will be saved
-dir.create(here::here("output", "plots"))
+fs::dir_create(here::here("output", "plots"))
 
 # save plot
 ggsave(
