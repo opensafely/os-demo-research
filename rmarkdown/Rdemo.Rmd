@@ -144,7 +144,7 @@ The `"category": {"ratios": {"STP1" : 0.3, "STP2" : 0.2, "STP3" : 0.5}}` line sa
 
 
 This study definition uses two in-built variable functions in the OpenSAFELY `cohortextractor`'s `patients` module, `patients.registered_as_of()` and `patients.registered_practice_as_of()`.
-There are many more such functions, like `patients.age()`, `patients.with_these_clinical_events()`, and `patients.admitted_to_icu()`, which are listed in [OpenSAFELY's documentation](https://docs.opensafely.org/en/latest/study-def-variables/). 
+There are many more such functions, like `patients.age()`, `patients.with_these_clinical_events()`, and `patients.admitted_to_hospital()`, which are listed in [OpenSAFELY's documentation](https://docs.opensafely.org/en/latest/study-def-variables/). 
 
 Note that more realistic STP dummy values are possible.
 For example, by creating [a table of realistic STP values and their proportions](https://github.com/opensafely/os-demo-research/blob/master/lib/STPs.csv) and 
