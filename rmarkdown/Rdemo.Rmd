@@ -262,7 +262,7 @@ To save the chart to the output folder, add the following to the end of the file
 
 ```{r,  eval=FALSE, warning = FALSE, message = FALSE}
 # create directory where output will be saved
-dir.create(here::here("output", "plots"))
+fs::dir_create(here::here("output", "plots"))
 
 ggsave(
   plot= plot_stppop_bar,
@@ -274,7 +274,7 @@ ggsave(
 ```
 
 > **Note**
-> if we want to put the output plot in a `plots` subfolder, we need to ensure it exists with `dir.create(here::here("output", "plots"))`. When the action is run with the `opensafely run` command, it will ignore any files that match expected outputs and any emoty folders. An error similar to
+> if we want to put the output plot in a `plots` subfolder, we need to ensure it exists, for example with `fs::dir_create(here::here("output", "plots"))`. When the action is run with the `opensafely run` command, it will ignore any files that match expected outputs and any emoty folders. An error similar to
 > ```
 > Error in grid.newpage():
     could not open file '/workspace/output/plots/plot_stppop_bar.png'
