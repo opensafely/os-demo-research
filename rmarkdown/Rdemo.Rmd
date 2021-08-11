@@ -24,7 +24,7 @@ All our analytic software is open for security review, scientific review, and re
 This document is intended as a short walkthrough of the OpenSAFELY platform. Please visit [docs.opensafely.org](https://docs.opensafely.org/en/latest/) for more comprehensive documentation, and [opensafely.org](https://opensafely.org/) for any other info.
 
 
-The examples in this document are all available in the [os-demo-research](https://github.com/opensafely/os-demo-research) github repository.
+The examples in this document are all available in the [os-demo-research](https://github.com/opensafely/os-demo-research) GitHub repository.
 
 ### Technical pre-requisites
 
@@ -33,14 +33,14 @@ OpenSAFELY maintains extremely high standards for data privacy, whilst ensuring 
 
 ### Key concepts
 
-* A **study definition** specifies the patients you want to include in your study and defines the variables that describe them. Study definitions are defined as a Python script. It relies heavily on an easily-readable API for defining variables, so that Python expertise is not necessary.
-* The **cohort extractor** uses the study definition to create a dataset for analysis. This is either:
+* A **study definition** specifies the patients you want to include in your study and defines the variables that describe them. Study definitions are defined as a Python script. It relies heavily on an easily-readable API for defining variables, so that familiarity with Python is not necessary.
+* The **cohort extractor** uses the study definition to create a dataset for analysis. This is either creates:
    * A dummy dataset used for developing and testing analysis code on the user's own machine. Users have control over the characteristics of each dummy variable, which are defined inside the study definition. 
    * A real dataset created from the OpenSAFELY database, used for the real analysis. Real datasets never leave the secure server &mdash; only summary data and other outputs that are derived from them can be released, after thorough disclosivity checks.
-* A **Codelist** is a collection of clinical codes that define a particular condition, event or diagnosis.
-* The **project pipeline** defines dependencies within the project's analytic code. For example `make_chart.R` depends on `process_data.R`, which depends on the study dataset having been extracted. This reduces redundancies by only running scripts that need to be run.
-* The *[`opensafely` command-line interface])(https://github.com/opensafely-core/opensafely-cli)* is used to run actions defined in the project pipelines, as well as other useful tasks like importing codelists.
-* The **job server** runs the actions defined in the project pipeline using real data. You can see it at [jobs.opensafely.org](https://jobs.opensafely.org).
+* A **codelist** is a collection of clinical codes that define a particular condition, event or diagnosis.
+* An **action** is a discrete chunk of analysis which creates one or more outputs. Each action usually corresponds to an analysis script. Actions are defined in the **project.yaml** file, including their dependencies on other actions and the sensitivity of their outputs regarding disclosure control. For example `make_chart.R` (moderately sensitive) depends on `process_data.R` (highly sensitive), which depends on the study dataset (highly sensitive) having been extracted. 
+* The *[`opensafely` command-line interface])(https://github.com/opensafely-core/opensafely-cli)* is used to run actions locally, as well as other useful tasks like importing codelists.
+* The **job server** runs the actions using real data. You can see it at [jobs.opensafely.org](https://jobs.opensafely.org).
 
 
 ### Workflow
@@ -59,7 +59,7 @@ This repo will contain all the code relating to your project and a history of it
     -   importing any other external files needed for analysis
     -   generating analysis outputs like tables and figures
     -   generating log files to debug the scripts when they run on the real data.
-5.  **Test the code** by running the analysis steps specified in the [_project pipeline_](https://docs.opensafely.org/actions-pipelines/), which specifies the execution order for data extracts and analyses and the outputs to be released.
+5.  **Test the code** by running the analysis steps specified in the [project.yaml](https://docs.opensafely.org/actions-pipelines/), which specifies the execution order for data extracts and analyses and the outputs to be released.
 6.  **Execute the analysis on the real data** via the [job server](https://jobs.opensafely.org). This will generate outputs on the secure server.
 7.  **Check the output for disclosivity** within the server, and redact if necessary.
 8.  **Release the outputs** via GitHub.
@@ -80,7 +80,7 @@ Let's start with a simple example.
 
 ## Example 1 &mdash; STP patient population
 
-This example introduces study definitions, expectations and dummy data, and project pipelines. We're going to use OpenSAFELY to find out how many patients are registered at a TPP practice within each STP (Sustainability and Transformation Partnership) on 1 January 2020. 
+This example introduces study definitions, expectations and dummy data, and the `project.yaml`. We're going to use OpenSAFELY to find out how many patients are registered at a TPP practice within each STP (Sustainability and Transformation Partnership) on 1 January 2020. 
 
 ### Create a git repository
 
@@ -301,8 +301,8 @@ Following these instructions will create the required outputs on the server, whi
 
 ### Check the outputs for disclosivity and release the outputs
 
-This is a manual step that must be carried out entirely in the serve. 
-[Instructions for this process are available](https://docs.opensafely.org/en/latest/releasing-files/) for individuals with appropriate permissions.. 
+This is a manual step that must be carried out entirely in the server. 
+[Instructions for this process are available](https://docs.opensafely.org/en/latest/releasing-files/) for individuals with appropriate permissions. 
 Essentially, the step ensures that the outputs do not contain any potentially disclosive information due to small patient counts. 
 
 Once results have been checked they can be released via GitHub. 
@@ -389,7 +389,7 @@ Then as before, we define the cohort population and the variables we want to ext
 
 The first argument states the series of conditions patients must satisfy to be included.  After this, the variables in the condition statement can be defined. Note that these variables can either be defined under this statement (as with `registered` and `died`) or elsewhere in the study definition.
 
-Here `registered` is used to select patients registered as of the index date and `died` is used to select any patients that died on or before the index date. As for many in-built variable functions, `patients.died_from_any_cause()` has multiple options for how the variable should returned, defined by `returning`. Here we are interested in whether the patient has died or not so use the option `"binary_flag"`.
+Here `registered` is used to select patients registered as of the index date and `died` is used to select any patients that died on or before the index date. As for many in-built variable functions, `patients.died_from_any_cause()` has multiple options for how the variable should returned, selected using the `returning` argument. Here we are interested in whether the patient has died or not so use the option `"binary_flag"`.
 
 As before, we then define a `cohortextractor` action in the `project.yaml` file, and run using `opensafely run`. The other variables extracted are `sex`, `date_death`, and `death_category`. These use some new variable functions and some more expectation definitions, whose details can be found in the Study Definition [variable reference](https://docs.opensafely.org/en/latest/study-def-variables/).
 
@@ -399,13 +399,13 @@ If you are defining a population satisfying a list of criteria, as here, you wil
 
 Once again, we use the dummy data to develop the analysis script then create a `project.yaml` to run the entire study on the real data. 
 The analysis script is available in the file [`/analysis/2-plot-deaths.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/2-plot-deaths.R). 
-This script is run by the job server via the `project.yaml` file, then the outputs are reviewed in the server and released via github. 
+This script is run by the job server via the `project.yaml` file, then the outputs are reviewed in the server and released via GitHub. 
 The final graph looks like this:
 
 [![](../released-ouput/plots/plot_deaths.png "covid-related deaths"){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_deaths.png)
 
-Here you can see the familiar covid mortality bump during the first wave of the pandemic. 
-There is also a bump in non-covid deaths, suggesting that identification of covid-related deaths may not be 100\% sensitive, or that health services struggled during this period, or that people were not seeking the care they needed.
+Here you can see the familiar COVID-19 mortality bump during the first wave of the pandemic. 
+There is also a bump in non-COVID-19 deaths, perhaps suggesting that identification of COVID-19 deaths may not be 100\% sensitive, or that health services struggled during this period, or that people were not seeking the care they needed.
 
 ## Example 3 &mdash; Primary care activity throughout the pandemic.
 
