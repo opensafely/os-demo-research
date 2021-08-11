@@ -6,7 +6,7 @@ library('sf')
 
 ## import data
 df_input <- read_csv(
-  here::here("output", "cohorts", "input_1_stppop_map.csv"),
+  here::here("output", "cohorts", "input_1_stppop_v3.csv"),
   col_types = cols(
     patient_id = col_integer(),
     stp = col_character()
@@ -43,7 +43,7 @@ fs::dir_create(here::here("output", "plots"))
 # save plot
 ggsave(
   plot= plot_stppop_map,
-  filename="plot_stppop_map.png", path=here::here("output", "plots"),
+  filename="plot_stppop_map_v3.png", path=here::here("output", "plots"),
   units = "cm",
   height = 10,
   width = 10
@@ -75,7 +75,7 @@ plot_stppop_bar <- sf_stppop %>%
 
 ggsave(
   plot= plot_stppop_bar,
-  filename="plot_stppop_bar_names.png", path=here::here("output", "plots"),
+  filename="plot_stppop_bar_names_v3.png", path=here::here("output", "plots"),
   units = "cm",
   height = 15,
   width = 15

@@ -317,31 +317,38 @@ Here we're just linking to the released `.png` files in the repo (clicking the i
 We could have also released the underlying STP count data and developed an analysis script directly on this dataset, provided it is non-disclosive. 
 However, typically only the most high-level aggregated datasets are suitable for public release. 
 
+### A note on dummy data
+
 We could also create something more sophisticated like a map, and include full STP names instead of codes.
-This requires a shape file, and to run successfully locally would also need matching dummy data. 
-See the [`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_map.py) study definition and [`analysis/1-plot-stppop_map.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/1-plot-stppop_map.R) R script to see how this would work.
+The outputs on real data look like this:
 
-The outputs look like this:
+[![](../released-ouput/plots/plot_stppop_bar_names.png "registration count by STP"){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar_names_v2.png)
 
-[![](../released-ouput/plots/plot_stppop_bar_names.png "registration count by STP"){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar_names.png)
+[![](../released-ouput/plots/plot_stppop_map.png "registration count by STP"){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_map_v2.png)
 
-[![](../released-ouput/plots/plot_stppop_map.png "registration count by STP"){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_map.png)
+As the script used to create the map uses a [shape file](https://github.com/opensafely/os-demo-research/blob/master/lib/STPshapefile.json), the dataset needs to contain the real STP codes so that the shape file matches the data. Running the script on dummy data where the STP codes are "STP1" "STP2" and "STP3", as above, wouldn't work. So the dummy data needs to usee real STP codes. 
+
+One way to do this is outlined in an alternative study definition, [`study_definition_1_stppop_v2.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_v2.py), where the _expectations_ for the `stp` variable is based on real STP codes imported from a CSV file. 
+
+You can also provide your own dummy data. This can be created however you like, as long as it contains the same variables that would be present based on the specification in the study definition. To use a custom dummy dataset, you can [designate the file as the dummy data in the cohort extractor action](https://docs.opensafely.org/study-def-expectations/#providing-your-own-dummy-data). This allows you to bypass the expectations framework provided by OpenSafely, which can sometimes be quite restrictive. You can make the variables, and the relationships between them, as realistic as necessary to test arbitrarily complex analyses.
+
+See the  (https://github.com/opensafely/os-demo-research/blob/master/analysis/custom_dummy_data_stp.R) and the [custom dummy data section in the `project.yaml`](https://github.com/opensafely/os-demo-research/blob/master/project.yaml#85) to see custom dummy data in action.
 
 
-## Example 2 &mdash; Covid versus non-covid deaths
+## Example 2 &mdash; COVID-19 versus non-COVID-19 deaths
 
 This example introduces codelists. 
-We're going to use OpenSAFELY to look at the frequency of covid-related deaths compared with non-covid deaths between 1 January 2020 and 30 September 2020, and see how this differs by age and sex. For this, we'll need death dates for anyone in the database who died during the period of interest, and we'll need a way to identify whether these deaths were covid-related or not.
+We're going to use OpenSAFELY to look at the frequency of covid-related deaths compared with non-covid deaths between 1 January 2020 and 30 September 2020, and see how this differs by age and sex. For this, we'll need death dates for anyone in the database who died during the period of interest, and we'll need a way to identify whether these deaths were COVID-19-related or not.
 
 ### Study definition
 
-The study definition for this task is available at [`/analysis/study_definition_2_deaths.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_2_deaths.py), and can be viewed by clicking `code` to the right. 
+The study definition for this example is available at [`/analysis/study_definition_2_deaths.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_2_deaths.py), and can be viewed by clicking `code` to the right. 
 
 
 ```{python, class.source = "fold-hide", eval=FALSE, code=readLines("../analysis/study_definition_2_deaths.py")}
 ```
 As before, we first import libraries and dictionaries. 
-This time we also import the codelist for identifying covid-related deaths.
+This time we also import the codelist for identifying COVID-19 deaths.
 This uses data from death certificates, which are coded using ICD-10 codes. 
 The covid codes in this system are `U071` and `U072`, and have been collected in a codelist at [https://www.opencodelists.org/codelist/opensafely/covid-identification/2020-06-03/](https://www.opencodelists.org/codelist/opensafely/covid-identification/2020-06-03/). 
 To import the codelists, put the codelist path (opensafely/covid-identification/2020-06-03) in the `codelists/codelists.txt` file in the repo, then run the following command:
@@ -350,7 +357,7 @@ To import the codelists, put the codelist path (opensafely/covid-identification/
 opensafely codelists update
 ```
 
-This will create a `.csv` for each codelist, which are imported to the study definition using
+This will create a CSV file for each codelist in `codelists/codelists.txt`, which are imported to the study definition using
 
 ```{python,  eval=FALSE}
 codes_ICD10_covid = codelist_from_csv(
@@ -360,7 +367,7 @@ codes_ICD10_covid = codelist_from_csv(
 )
 ```
 
-Then as before, we define the cohort population and the variables we want to extract within a study definition.  Here we utilise `satisfying()` to define a population who meet a range of criteria.
+Then as before, we define the cohort population and the variables we want to extract within a study definition.  Here we use the `patients.satisfying()` function to define a population who meet a range of criteria.
 
 ```{python,  eval=FALSE}
     ...
