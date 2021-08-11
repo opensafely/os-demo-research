@@ -326,13 +326,13 @@ The outputs on real data look like this:
 
 [![](../released-ouput/plots/plot_stppop_map.png "registration count by STP"){width="50%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_map_v2.png)
 
-As the script used to create the map uses a [shape file](https://github.com/opensafely/os-demo-research/blob/master/lib/STPshapefile.json), the dataset needs to contain the real STP codes so that the shape file matches the data. Running the script on dummy data where the STP codes are "STP1" "STP2" and "STP3", as above, wouldn't work. So the dummy data needs to usee real STP codes. 
+As the script used to create the map uses a [shape file](https://github.com/opensafely/os-demo-research/blob/master/lib/STPshapefile.json), the dataset needs to contain the real STP codes so that the shape file matches the data. Running the script on dummy data where the STP codes are "STP1" "STP2" and "STP3", as above, wouldn't work. So the dummy data needs to use real STP codes. 
 
 One way to do this is outlined in an alternative study definition, [`study_definition_1_stppop_v2.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_v2.py), where the _expectations_ for the `stp` variable is based on real STP codes imported from a CSV file. 
 
 You can also provide your own dummy data. This can be created however you like, as long as it contains the same variables that would be present based on the specification in the study definition. To use a custom dummy dataset, you can [designate the file as the dummy data in the cohort extractor action](https://docs.opensafely.org/study-def-expectations/#providing-your-own-dummy-data). This allows you to bypass the expectations framework provided by OpenSafely, which can sometimes be quite restrictive. You can make the variables, and the relationships between them, as realistic as necessary to test arbitrarily complex analyses.
 
-See the  (https://github.com/opensafely/os-demo-research/blob/master/analysis/custom_dummy_data_stp.R) and the [custom dummy data section in the `project.yaml`](https://github.com/opensafely/os-demo-research/blob/master/project.yaml#85) to see custom dummy data in action.
+See the [`custom_dummy_data_stp.R` script](https://github.com/opensafely/os-demo-research/blob/master/analysis/custom_dummy_data_stp.R) and the [custom dummy data section in the `project.yaml`](https://github.com/opensafely/os-demo-research/blob/7c54d175a0d004f106157dc105a71dbe4f720646/project.yaml#L99) to see custom dummy data in action.
 
 
 ## Example 2 &mdash; COVID-19 versus non-COVID-19 deaths
