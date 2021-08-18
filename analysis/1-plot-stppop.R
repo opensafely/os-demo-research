@@ -25,7 +25,7 @@ plot_stppop_bar <- df_stppop %>%
     title="TPP-registered patients per STP",
     subtitle= "as at 1 January 2020",
     y=NULL,
-    x="Registered patients\n(million)",
+    x="Registered patients\n(million people)",
     fill = NULL)+
   theme_minimal()+
   theme(
