@@ -3,10 +3,10 @@ title: "An OpenSAFELY platform demonstration using R"
 author: "Will Hulme, Researcher, The DataLab, University of Oxford"
 date: "18/01/2021"
 output:
-  html_document:
-    code_folding: show
   md_document:
     variant: gfm
+  html_document:
+    code_folding: show
 ---
 
 ```{r setup, include=FALSE}
@@ -328,12 +328,7 @@ The outputs on real data look like this:
 
 As the script used to create the map uses a [shape file](https://github.com/opensafely/os-demo-research/blob/master/lib/STPshapefile.json), the dataset needs to contain the real STP codes so that the shape file matches the data. Running the script on dummy data where the STP codes are "STP1" "STP2" and "STP3", as above, wouldn't work. So the dummy data needs to use real STP codes. 
 
-One way to do this is outlined in an alternative study definition, [`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_map.py), where the _expectations_ for the `stp` variable is based on real STP codes imported from a CSV file. 
-
-You can also provide your own dummy data. This can be created however you like, as long as it contains the same variables that would be present based on the specification in the study definition. To use a custom dummy dataset, you can [designate the file as the dummy data in the cohort extractor action](https://docs.opensafely.org/study-def-expectations/#providing-your-own-dummy-data). This allows you to bypass the expectations framework provided by OpenSafely, which can sometimes be quite restrictive. You can make the variables, and the relationships between them, as realistic as necessary to test arbitrarily complex analyses.
-
-See the [`custom_dummy_data_stp.R` script](https://github.com/opensafely/os-demo-research/blob/master/analysis/custom_dummy_data_stp.R) and the [custom dummy data section in the `project.yaml`](https://github.com/opensafely/os-demo-research/blob/7c54d175a0d004f106157dc105a71dbe4f720646/project.yaml#L99) to see custom dummy data in action.
-
+One way to do this is outlined in an alternative study definition, [`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_map.py), where the _expectations_ for the `stp` variable is based on real STP codes imported from a CSV file. You could also provide your own dummy data. Example 4 explains this in more detail.
 
 ## Example 2 &mdash; COVID-19 versus non-COVID-19 deaths
 
@@ -409,7 +404,7 @@ There is also a bump in non-COVID-19 deaths, perhaps suggesting that identificat
 
 ## Example 3 &mdash; Primary care activity throughout the pandemic.
 
-In our final example, we introduce the Measures framework. 
+In this example, we introduce the Measures framework. 
 This enables the extraction of multiple study cohorts each covering different time periods, and calculates a set of statistics for each period. 
 
 We'll look at the frequency of cholesterol and INR (International Normalised Ratio, which measures how long it takes for blood to clot) measurements recorded in the Primary Care record, by practice and by STP.
@@ -542,12 +537,32 @@ However, for INR the decline is less pronounced.
 
 We can also look at deciles of measurement activity for each GP practice for cholesterol:
 
-[![](../released-ouput/plots/plot_quantiles_cholesterol_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_practice.png)
+[![](../released-ouput/plots/plot_quantiles_cholesterol_stp.png){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_practice.png)
 
 
 and for INR:
 
-[![](../released-ouput/plots/plot_quantiles_inr_stp.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
+[![](../released-ouput/plots/plot_quantiles_inr_stp.png){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
+
+## Example 4 &mdash; Custom dummy data
+
+If OpenSAFELY's expectations framework isn't flexible enough for your needs, you can bypass it by providing your own dummy dataset. This allows you to make the variables, and the relationships between them, as realistic as necessary to test arbitrarily complex analyses. The only requirement is that the dataset contains the same variables that would be present based on the specification in the study definition. 
+
+
+As an example, suppose we are interested in the rate of unplanned hospital admissions, and how this varies with diabetes status and the number of admissions in the preceding year. We might suppose that both those characteristics increase the likelihood of unplanned admissions, and so we want to express that in our dummy data. 
+
+We start by writing the [study definition](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_4_admissions.py) we would need to extract this data from the server. If we use the dummy data specified by the study definition's expectations, then there's no relationship between the variables:
+
+[![](../output/plots/plot_admissions_by_diabetes_dummy.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_diabetes_dummy.png)
+
+[![](../output/plots/plot_admissions_by_previous_dummy.png){width="80%"}](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_previous_dummy.png)
+
+So we're going to create the dummy dataset ourselves. We do this in the [custom_dummy_data.R](https://github.com/opensafely/os-demo-research/blob/master/analysis/custom_dummy_data.R) script, but you are free to use whatever language or method you like to create the dummy data. This script outputs a CSV file called [custom_dummy_data.csv](https://github.com/opensafely/os-demo-research/blob/master/output/cohorts/custom_dummy_data.csv). To use this file instead of the expectations framework, you need to commit the dataset to the repo and designate the file as the dummy data in the cohort extractor action in the project.yaml, [as explained in the documention pages](https://docs.opensafely.org/study-def-expectations/#providing-your-own-dummy-data). See [Example 4 in the `project.yaml`]() to see how it works for this example. 
+
+Now if we re-do the time-to-admission plots, we can see that the rate of unplanned admissions is higher for those with diabetes and those with more previous admissions:
+
+[![](../output/plots/plot_admissions_by_diabetes.png){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_diabetes.png)
+[![](../output/plots/plot_admissions_by_previous.png){width="70%"}](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_previous.png)
 
 
 ## More information

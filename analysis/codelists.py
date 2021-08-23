@@ -6,6 +6,10 @@ codes_ICD10_covid = codelist_from_csv(
     "codelists/opensafely-covid-identification.csv", system="icd10", column="icd10_code"
 )
 
+codes_diabetes = codelist_from_csv(
+    "codelists/opensafely-diabetes.csv", system="ctv3", column="id"
+)
+
 codes_cholesterol = codelist_from_csv(
     "codelists-local/cholesterol-measurement.csv", system="ctv3", column="id"
 )
