@@ -977,11 +977,11 @@ realistic as necessary to test arbitrarily complex analyses. The only
 requirement is that the dataset contains the same variables that would
 be present based on the specification in the study definition.
 
-As an example, suppose we are interested in the rate of unplanned
-hospital admissions, and how this varies with diabetes status and the
-number of admissions in the preceding year. We might suppose that both
-those characteristics increase the likelihood of unplanned admissions,
-and so we want to express that in our dummy data.
+As an example, say we are interested in the rate of unplanned hospital
+admissions, and how this varies with diabetes status and the number of
+admissions in the preceding year. We might suppose that both those
+characteristics increase the likelihood of unplanned admissions, and so
+we want to express that in our dummy data.
 
 We start by writing the [study
 definition](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_4_admissions.py)
@@ -1003,8 +1003,9 @@ commit the dataset to the repo and designate the file as the dummy data
 in the cohort extractor action in the project.yaml, [as explained in the
 documention
 pages](https://docs.opensafely.org/study-def-expectations/#providing-your-own-dummy-data).
-See [Example 4 in the `project.yaml`]() to see how it works for this
-example.
+See [Example 4 in the
+`project.yaml`](https://github.com/opensafely/os-demo-research/blob/75be8a1a4e269f206874d14a1eedead9fa752f03/project.yaml#L84)
+to see how it works for this example.
 
 Now if we re-do the time-to-admission plots, we can see that the rate of
 unplanned admissions is higher for those with diabetes and those with
