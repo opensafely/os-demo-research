@@ -56,6 +56,7 @@ actions:
       moderately_sensitive:
         figure: output/plots/plot_deaths.png
 
+
 # Example 3
 ## Actions to plot gp activity over time
 
@@ -78,9 +79,6 @@ actions:
     outputs:
       moderately_sensitive:
         figure: output/plots/plot_*.png
-
-
-
 
 
 # Example 4
