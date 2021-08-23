@@ -6,7 +6,8 @@ expectations:
 actions:
 
 
-# actions to plot TPP-STP size
+# Example 1
+## Actions to plot TPP-STP size
 
   generate_cohort_stppop:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_1_stppop --output-dir=output/cohorts
@@ -21,8 +22,26 @@ actions:
       moderately_sensitive:
         figure: output/plots/plot_stppop_bar.png
 
+## Alternative stppop anaylsis using different dummy data
+## Dummy data created using a more sophisticated study definition:
 
-# actions to plot deaths over time
+  generate_cohort_stppop_map:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_1_stppop_map --output-dir=output/cohorts
+    outputs:
+      highly_sensitive:
+        cohort: output/cohorts/input_1_stppop_map.csv
+
+  plot_stppop_map:
+    run: r:latest analysis/1-plot-stppop_map.R
+    needs: [generate_cohort_stppop_map]
+    outputs:
+      moderately_sensitive:
+        figure1: output/plots/plot_stppop_bar_names_map.png
+        figure2: output/plots/plot_stppop_map_map.png
+
+
+# Example 2
+## Actions to plot deaths over time
 
   generate_cohort_deaths:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_2_deaths --output-dir=output/cohorts
@@ -38,7 +57,8 @@ actions:
         figure: output/plots/plot_deaths.png
 
 
-# actions to plot gp activity over time
+# Example 3
+## Actions to plot gp activity over time
 
   generate_cohort_activity:
     run: cohortextractor:latest generate_cohort --study-definition study_definition_3_activity --index-date-range "2020-01-01 to 2020-09-01 by month" --output-dir=output/measures
@@ -61,18 +81,37 @@ actions:
         figure: output/plots/plot_*.png
 
 
-# alternative stppop anaylsis using better dummy data
+# Example 4
+## Dummy data created to using custom dummy data:
 
-  generate_cohort_stppop_map:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_1_stppop_map --output-dir=output/cohorts
-    outputs:
-      highly_sensitive:
-        cohort: output/cohorts/input_1_stppop_map.csv
-
-  plot_stppop_map:
-    run: r:latest analysis/1-plot-stppop_map.R
-    needs: [generate_cohort_stppop_map]
+  # Create dummy data manually first
+  create_custom_dummy_data:
+    run: r:latest analysis/custom_dummy_data.R
     outputs:
       moderately_sensitive:
-        figure1: output/plots/plot_stppop_bar_names.png
-        figure2: output/plots/plot_stppop_map.png
+        cohort: output/cohorts/custom_dummy_data.csv
+
+  # extract data, but use custom dummy data if running locally
+  generate_cohort_admissions:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_4_admissions --output-dir=output/cohorts
+    needs: [create_custom_dummy_data]
+    dummy_data_file: output/cohorts/custom_dummy_data.csv
+    outputs:
+      highly_sensitive:
+        cohort: output/cohorts/input_4_admissions.csv
+
+  # run the R script
+  plot_admissions:
+    run: r:latest analysis/4-admissions.R
+    needs: [generate_cohort_admissions]
+    outputs:
+      moderately_sensitive:
+        figure1: output/plots/plot_admissions_by_diabetes.png
+        figure2: output/plots/plot_admissions_by_previous.png
+
+
+
+
+
+
+

@@ -23,7 +23,7 @@ comprehensive documentation, and
 
 The examples in this document are all available in the
 [os-demo-research](https://github.com/opensafely/os-demo-research)
-github repository.
+GitHub repository.
 
 ### Technical pre-requisites
 
@@ -47,10 +47,10 @@ been completed.
 -   A **study definition** specifies the patients you want to include in
     your study and defines the variables that describe them. Study
     definitions are defined as a Python script. It relies heavily on an
-    easily-readable API for defining variables, so that Python expertise
-    is not necessary.
+    easily-readable API for defining variables, so that familiarity with
+    Python is not necessary.
 -   The **cohort extractor** uses the study definition to create a
-    dataset for analysis. This is either:
+    dataset for analysis. This is either creates:
     -   A dummy dataset used for developing and testing analysis code on
         the user’s own machine. Users have control over the
         characteristics of each dummy variable, which are defined inside
@@ -59,20 +59,22 @@ been completed.
         the real analysis. Real datasets never leave the secure server —
         only summary data and other outputs that are derived from them
         can be released, after thorough disclosivity checks.
--   A **Codelist** is a collection of clinical codes that define a
+-   A **codelist** is a collection of clinical codes that define a
     particular condition, event or diagnosis.
--   The **project pipeline** defines dependencies within the project’s
-    analytic code. For example `make_chart.R` depends on
-    `process_data.R`, which depends on the study dataset having been
-    extracted. This reduces redundancies by only running scripts that
-    need to be run.
+-   An **action** is a discrete chunk of analysis which creates one or
+    more outputs. Each action usually corresponds to an analysis script.
+    Actions are defined in the **project.yaml** file, including their
+    dependencies on other actions and the sensitivity of their outputs
+    regarding disclosure control. For example `make_chart.R` (moderately
+    sensitive) depends on `process_data.R` (highly sensitive), which
+    depends on the study dataset (highly sensitive) having been
+    extracted.
 -   The *\[`opensafely` command-line
     interface\])(<https://github.com/opensafely-core/opensafely-cli>)*
-    is used to run actions defined in the project pipelines, as well as
-    other useful tasks like importing codelists.
--   The **job server** runs the actions defined in the project pipeline
-    using real data. You can see it at
-    [jobs.opensafely.org](https://jobs.opensafely.org).
+    is used to run actions locally, as well as other useful tasks like
+    importing codelists.
+-   The **job server** runs the actions using real data. You can see it
+    at [jobs.opensafely.org](https://jobs.opensafely.org).
 
 ### Workflow
 
@@ -103,10 +105,9 @@ study can typically be broken down into the following steps:
     -   generating log files to debug the scripts when they run on the
         real data.
 5.  **Test the code** by running the analysis steps specified in the
-    [*project
-    pipeline*](https://docs.opensafely.org/actions-pipelines/), which
-    specifies the execution order for data extracts and analyses and the
-    outputs to be released.
+    [project.yaml](https://docs.opensafely.org/actions-pipelines/),
+    which specifies the execution order for data extracts and analyses
+    and the outputs to be released.
 6.  **Execute the analysis on the real data** via the [job
     server](https://jobs.opensafely.org). This will generate outputs on
     the secure server.
@@ -136,7 +137,7 @@ Let’s start with a simple example.
 ## Example 1 — STP patient population
 
 This example introduces study definitions, expectations and dummy data,
-and project pipelines. We’re going to use OpenSAFELY to find out how
+and the `project.yaml`. We’re going to use OpenSAFELY to find out how
 many patients are registered at a TPP practice within each STP
 (Sustainability and Transformation Partnership) on 1 January 2020.
 
@@ -263,7 +264,7 @@ OpenSAFELY `cohortextractor`’s `patients` module,
 `patients.registered_practice_as_of()`. There are many more such
 functions, like `patients.age()`,
 `patients.with_these_clinical_events()`, and
-`patients.admitted_to_icu()`, which are listed in [OpenSAFELY’s
+`patients.admitted_to_hospital()`, which are listed in [OpenSAFELY’s
 documentation](https://docs.opensafely.org/en/latest/study-def-variables/).
 
 Note that more realistic STP dummy values are possible. For example, by
@@ -417,7 +418,7 @@ the file:
 
 ``` r
 # create directory where output will be saved
-dir.create(here::here("output", "plots"))
+fs::dir_create(here::here("output", "plots"))
 
 ggsave(
   plot= plot_stppop_bar,
@@ -429,10 +430,10 @@ ggsave(
 ```
 
 > **Note** if we want to put the output plot in a `plots` subfolder, we
-> need to ensure it exists with
-> `dir.create(here::here("output", "plots"))`. When the action is run
-> with the `opensafely run` command, it will ignore any files that match
-> expected outputs and any emoty folders. An error similar to
+> need to ensure it exists, for example with
+> `fs::dir_create(here::here("output", "plots"))`. When the action is
+> run with the `opensafely run` command, it will ignore any files that
+> match expected outputs and any emoty folders. An error similar to
 >
 >     Error in grid.newpage():
 >     could not open file '/workspace/output/plots/plot_stppop_bar.png'
@@ -467,10 +468,10 @@ researchers).
 
 ### Check the outputs for disclosivity and release the outputs
 
-This is a manual step that must be carried out entirely in the serve.
+This is a manual step that must be carried out entirely in the server.
 [Instructions for this process are
 available](https://docs.opensafely.org/en/latest/releasing-files/) for
-individuals with appropriate permissions.. Essentially, the step ensures
+individuals with appropriate permissions. Essentially, the step ensures
 that the outputs do not contain any potentially disclosive information
 due to small patient counts.
 
@@ -490,32 +491,41 @@ underlying STP count data and developed an analysis script directly on
 this dataset, provided it is non-disclosive. However, typically only the
 most high-level aggregated datasets are suitable for public release.
 
+### A note on dummy data
+
 We could also create something more sophisticated like a map, and
-include full STP names instead of codes. This requires a shape file, and
-to run successfully locally would also need matching dummy data. See the
-[`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_map.py)
-study definition and
-[`analysis/1-plot-stppop_map.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/1-plot-stppop_map.R)
-R script to see how this would work.
+include full STP names instead of codes. The outputs on real data look
+like this:
 
-The outputs look like this:
+[<img src="../released-ouput/plots/plot_stppop_bar_names.png" title="registration count by STP" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar_names_map.png)
 
-[<img src="../released-ouput/plots/plot_stppop_bar_names.png" title="registration count by STP" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_bar_names.png)
+[<img src="../released-ouput/plots/plot_stppop_map.png" title="registration count by STP" style="width:50.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_map_map.png)
 
-[<img src="../released-ouput/plots/plot_stppop_map.png" title="registration count by STP" style="width:50.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_stppop_map.png)
+As the script used to create the map uses a [shape
+file](https://github.com/opensafely/os-demo-research/blob/master/lib/STPshapefile.json),
+the dataset needs to contain the real STP codes so that the shape file
+matches the data. Running the script on dummy data where the STP codes
+are “STP1” “STP2” and “STP3”, as above, wouldn’t work. So the dummy data
+needs to use real STP codes.
 
-## Example 2 — Covid versus non-covid deaths
+One way to do this is outlined in an alternative study definition,
+[`study_definition_1_stppop_map.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_1_stppop_map.py),
+where the *expectations* for the `stp` variable is based on real STP
+codes imported from a CSV file. You could also provide your own dummy
+data. Example 4 explains this in more detail.
+
+## Example 2 — COVID-19 versus non-COVID-19 deaths
 
 This example introduces codelists. We’re going to use OpenSAFELY to look
 at the frequency of covid-related deaths compared with non-covid deaths
 between 1 January 2020 and 30 September 2020, and see how this differs
 by age and sex. For this, we’ll need death dates for anyone in the
 database who died during the period of interest, and we’ll need a way to
-identify whether these deaths were covid-related or not.
+identify whether these deaths were COVID-19-related or not.
 
 ### Study definition
 
-The study definition for this task is available at
+The study definition for this example is available at
 [`/analysis/study_definition_2_deaths.py`](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_2_deaths.py),
 and can be viewed by clicking `code` to the right.
 
@@ -607,9 +617,9 @@ study = StudyDefinition(
 ```
 
 As before, we first import libraries and dictionaries. This time we also
-import the codelist for identifying covid-related deaths. This uses data
-from death certificates, which are coded using ICD-10 codes. The covid
-codes in this system are `U071` and `U072`, and have been collected in a
+import the codelist for identifying COVID-19 deaths. This uses data from
+death certificates, which are coded using ICD-10 codes. The covid codes
+in this system are `U071` and `U072`, and have been collected in a
 codelist at
 <https://www.opencodelists.org/codelist/opensafely/covid-identification/2020-06-03/>.
 To import the codelists, put the codelist path
@@ -621,8 +631,9 @@ command:
 opensafely codelists update
 ```
 
-This will create a `.csv` for each codelist, which are imported to the
-study definition using
+This will create a CSV file for each codelist in
+`codelists/codelists.txt`, which are imported to the study definition
+using
 
 ``` python
 codes_ICD10_covid = codelist_from_csv(
@@ -633,8 +644,9 @@ codes_ICD10_covid = codelist_from_csv(
 ```
 
 Then as before, we define the cohort population and the variables we
-want to extract within a study definition. Here we utilise
-`satisfying()` to define a population who meet a range of criteria.
+want to extract within a study definition. Here we use the
+`patients.satisfying()` function to define a population who meet a range
+of criteria.
 
 ``` python
     ...
@@ -664,9 +676,9 @@ Here `registered` is used to select patients registered as of the index
 date and `died` is used to select any patients that died on or before
 the index date. As for many in-built variable functions,
 `patients.died_from_any_cause()` has multiple options for how the
-variable should returned, defined by `returning`. Here we are interested
-in whether the patient has died or not so use the option
-`"binary_flag"`.
+variable should returned, selected using the `returning` argument. Here
+we are interested in whether the patient has died or not so use the
+option `"binary_flag"`.
 
 As before, we then define a `cohortextractor` action in the
 `project.yaml` file, and run using `opensafely run`. The other variables
@@ -686,21 +698,21 @@ create a `project.yaml` to run the entire study on the real data. The
 analysis script is available in the file
 [`/analysis/2-plot-deaths.R`](https://github.com/opensafely/os-demo-research/blob/master/analysis/2-plot-deaths.R).
 This script is run by the job server via the `project.yaml` file, then
-the outputs are reviewed in the server and released via github. The
+the outputs are reviewed in the server and released via GitHub. The
 final graph looks like this:
 
 [<img src="../released-ouput/plots/plot_deaths.png" title="covid-related deaths" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_deaths.png)
 
-Here you can see the familiar covid mortality bump during the first wave
-of the pandemic. There is also a bump in non-covid deaths, suggesting
-that identification of covid-related deaths may not be 100% sensitive,
-or that health services struggled during this period, or that people
-were not seeking the care they needed.
+Here you can see the familiar COVID-19 mortality bump during the first
+wave of the pandemic. There is also a bump in non-COVID-19 deaths,
+perhaps suggesting that identification of COVID-19 deaths may not be
+100% sensitive, or that health services struggled during this period, or
+that people were not seeking the care they needed.
 
 ## Example 3 — Primary care activity throughout the pandemic.
 
-In our final example, we introduce the Measures framework. This enables
-the extraction of multiple study cohorts each covering different time
+In this example, we introduce the Measures framework. This enables the
+extraction of multiple study cohorts each covering different time
 periods, and calculates a set of statistics for each period.
 
 We’ll look at the frequency of cholesterol and INR (International
@@ -950,11 +962,57 @@ pronounced.
 We can also look at deciles of measurement activity for each GP practice
 for cholesterol:
 
-[<img src="../released-ouput/plots/plot_quantiles_cholesterol_stp.png" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_practice.png)
+[<img src="../released-ouput/plots/plot_quantiles_cholesterol_stp.png" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_cholesterol_practice.png)
 
 and for INR:
 
-[<img src="../released-ouput/plots/plot_quantiles_inr_stp.png" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
+[<img src="../released-ouput/plots/plot_quantiles_inr_stp.png" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/released-ouput/plots/plot_quantiles_inr_practice.png)
+
+## Example 4 — Custom dummy data
+
+If OpenSAFELY’s expectations framework isn’t flexible enough for your
+needs, you can bypass it by providing your own dummy dataset. This
+allows you to make the variables, and the relationships between them, as
+realistic as necessary to test arbitrarily complex analyses. The only
+requirement is that the dataset contains the same variables that would
+be present based on the specification in the study definition.
+
+As an example, say we are interested in the rate of unplanned hospital
+admissions, and how this varies with diabetes status and the number of
+admissions in the preceding year. We might suppose that both those
+characteristics increase the likelihood of unplanned admissions, and so
+we want to express that in our dummy data.
+
+We start by writing the [study
+definition](https://github.com/opensafely/os-demo-research/blob/master/analysis/study_definition_4_admissions.py)
+we would need to extract this data from the server. If we use the dummy
+data specified by the study definition’s expectations, then there’s no
+relationship between the variables:
+
+[<img src="../output/plots/plot_admissions_by_diabetes_dummy.png" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_diabetes_dummy.png)
+
+[<img src="../output/plots/plot_admissions_by_previous_dummy.png" style="width:80.0%" />](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_previous_dummy.png)
+
+So we’re going to create the dummy dataset ourselves. We do this in the
+[custom\_dummy\_data.R](https://github.com/opensafely/os-demo-research/blob/master/analysis/custom_dummy_data.R)
+script, but you are free to use whatever language or method you like to
+create the dummy data. This script outputs a CSV file called
+[custom\_dummy\_data.csv](https://github.com/opensafely/os-demo-research/blob/master/output/cohorts/custom_dummy_data.csv).
+To use this file instead of the expectations framework, you need to
+commit the dataset to the repo and designate the file as the dummy data
+in the cohort extractor action in the project.yaml, [as explained in the
+documention
+pages](https://docs.opensafely.org/study-def-expectations/#providing-your-own-dummy-data).
+See [Example 4 in the
+`project.yaml`](https://github.com/opensafely/os-demo-research/blob/75be8a1a4e269f206874d14a1eedead9fa752f03/project.yaml#L84)
+to see how it works for this example.
+
+Now if we re-do the time-to-admission plots, we can see that the rate of
+unplanned admissions is higher for those with diabetes and those with
+more previous admissions:
+
+[<img src="../output/plots/plot_admissions_by_diabetes.png" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_diabetes.png)
+[<img src="../output/plots/plot_admissions_by_previous.png" style="width:70.0%" />](https://github.com/opensafely/os-demo-research/blob/master/output/plots/plot_admissions_by_previous.png)
 
 ## More information
 
