@@ -67,19 +67,19 @@ actions:
 
 # Dummy data created using a more sophisticated study definition:
 
-  generate_cohort_stppop_v2:
-    run: cohortextractor:latest generate_cohort --study-definition study_definition_1_stppop_v2 --output-dir=output/cohorts
+  generate_cohort_stppop_map:
+    run: cohortextractor:latest generate_cohort --study-definition study_definition_1_stppop_map --output-dir=output/cohorts
     outputs:
       highly_sensitive:
-        cohort: output/cohorts/input_1_stppop_v2.csv
+        cohort: output/cohorts/input_1_stppop_map.csv
 
   plot_stppop_map:
-    run: r:latest analysis/1-plot-stppop_v2.R
-    needs: [generate_cohort_stppop_v2]
+    run: r:latest analysis/1-plot-stppop_map.R
+    needs: [generate_cohort_stppop_map]
     outputs:
       moderately_sensitive:
-        figure1: output/plots/plot_stppop_bar_names_v2.png
-        figure2: output/plots/plot_stppop_map_v2.png
+        figure1: output/plots/plot_stppop_bar_names_map.png
+        figure2: output/plots/plot_stppop_map_map.png
 
 
 # Dummy data created to using custom dummy data:
